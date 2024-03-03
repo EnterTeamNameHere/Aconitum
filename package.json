@@ -1,0 +1,52 @@
+{
+  "name": "aconitum",
+  "version": "0.0.0",
+  "description": "",
+  "main": "src/main.ts",
+  "scripts": {
+    "prepare": "husky",
+    "build": "tsc",
+    "pm2-dev": "pm2 start ecosystem.config.cjs --env dev",
+    "pm2-prod": "pm2 start ecosystem.config.cjs --env prod",
+    "start-dev": "cross-env NODE_ENV=development node build/main.js",
+    "start-prod": "cross-env NODE_ENV=production node build/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EnterTeamNameHere/Aconitum.git"
+  },
+  "author": "KouRo, トコトコ, NXVZBGBFBEN",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EnterTeamNameHere/Aconitum/issues"
+  },
+  "homepage": "https://github.com/EnterTeamNameHere/Aconitum#readme",
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "discord.js": "^14.14.1",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-base-typescript": "^1.1.0",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "type": "module",
+  "volta": {
+    "node": "20.11.1",
+    "npm": "10.5.0"
+  },
+  "lint-staged": {
+    "src/*.{ts,mts,mts}": "eslint --fix",
+    "src/*.{ts,cts,mts,json,yaml,yml,md}": "prettier --write"
+  }
+}
