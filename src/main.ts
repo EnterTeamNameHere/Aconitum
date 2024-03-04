@@ -1,6 +1,6 @@
 import {Client, Events, GatewayIntentBits} from "discord.js";
 
-import config from "../env/config.json";
+import config from "./envConf.js";
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
@@ -8,7 +8,7 @@ const client = new Client({
 
 client.once(Events.ClientReady, async () => {
     console.log("Ready");
-    console.log(client);
+    console.log(config);
 });
 
 client.login(config.token);

@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "description": "",
   "main": "./build/main.js",
-
   "scripts": {
     "prepare": "husky",
     "build": "tsc",

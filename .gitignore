@@ -281,5 +281,6 @@ build/**
 !build/.gitkeep
 env/**
 !env/.gitkeep
-!env/config.tpl.josn
+config*.json
+!env/config.tpl.json
 discord.xml

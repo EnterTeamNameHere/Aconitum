@@ -1,8 +1,6 @@
-declare module "*/config.json"{
-    type config = {
-        token: string;
-    };
+import {Config} from "../interfaces/config.js";
 
-    const value: config;
+declare module "*/config.*.json"{
+    const value: Config;
     export = value;
 }
