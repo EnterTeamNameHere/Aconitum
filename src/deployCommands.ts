@@ -1,29 +1,39 @@
-/* eslint-disable */
+import { readdirSync } from "node:fs";
+import { join } from "path";
 
-import * as fs from "node:fs";
-import * as path from "path";
-import {REST, Routes} from "discord.js";
-import config from "./envConf";
-import {Commands} from "./interfaces/command";
 import {RESTPostAPIChatInputApplicationCommandsJSONBody} from "discord-api-types/v10";
+import {REST, Routes} from "discord.js";
 
-const commandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
-const commandsPath = path.join(__dirname, "commands");
-const commandsFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+import config from "./envConf";
+
+const globalCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
+const guildCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
+const commandsPath = join(__dirname, "commands");
+const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js"));
 const rest = new REST().setToken(config.token);
 
 (async () => {
     console.log(commandsPath);
     for (const file of commandsFiles) {
-        const filePath = path.join(commandsPath, file);
-        const commands = (await import(filePath)).commands;
+        const filePath = join(commandsPath, file);
+        const {commands} = await import(filePath);
         for (const command of commands) {
-            commandArray.push(command.data.toJSON());
+            if (command.global) {
+                globalCommandArray.push(command.data.toJSON());
+            } else {
+                guildCommandArray.push(command.data.toJSON());
+            }
         }
     }
 
     try {
-        await rest.put(Routes.applicationCommands(config.clientId), {body: commandArray});
+        await rest.put(Routes.applicationCommands(config.clientId), {body: globalCommandArray});
+    } catch (error) {
+        console.error(error);
+    }
+
+    try {
+        await rest.put(Routes.applicationGuildCommands(config.clientId, config.guildId), {body: guildCommandArray});
     } catch (error) {
         console.error(error);
     }

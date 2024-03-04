@@ -25,6 +25,7 @@
   "homepage": "https://github.com/EnterTeamNameHere/Aconitum#readme",
   "dependencies": {
     "cross-env": "^7.0.3",
+    "discord-api-types": "^0.37.71",
     "discord.js": "^14.14.1",
     "enquirer": "^2.4.1",
     "inquirer": "^9.2.15"
