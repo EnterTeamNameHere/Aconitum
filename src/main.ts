@@ -3,8 +3,10 @@ import {join} from "path";
 
 import {Client, CommandInteraction, Events, GatewayIntentBits, Interaction} from "discord.js";
 
-import config from "./envConf";
+import config from "./envConf.js";
 import {Command} from "./interfaces/command.js";
+
+const __dirname = import.meta.dirname;
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
@@ -16,7 +18,6 @@ const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".j
 
 client.once(Events.ClientReady, async () => {
     console.log("Ready");
-    console.log(`Type: ${config.type}`);
     for (const file of commandsFiles) {
         const filePath = join(commandsPath, file);
         const {commands} = await import(filePath);
