@@ -10,8 +10,10 @@
     "pm2-prod": "pm2 start ecosystem.config.cjs --env prod",
     "start-dev": "cross-env NODE_ENV=development node .",
     "start-prod": "cross-env NODE_ENV=production node .",
-    "run-deb": "cross-env NODE_ENV=development ts-node -P ./tsconfig.json --files src/main.ts",
-    "run-prod": "cross-env NODE_ENV=production ts-node -P ./tsconfig.json --files src/main.ts"
+    "run-dev": "cross-env NODE_ENV=development ts-node -P ./tsconfig.json --files src/main.ts",
+    "run-prod": "cross-env NODE_ENV=production ts-node -P ./tsconfig.json --files src/main.ts",
+    "cmd-dev": "cross-env NODE_ENV=development ts-node -P ./tsconfig.json --files src/deployCommands.ts",
+    "cmd-prod": "cross-env NODE_ENV=production ts-node -P ./tsconfig.json --files src/deployCommands.ts"
   },
   "repository": {
     "type": "git",
@@ -25,7 +27,9 @@
   "homepage": "https://github.com/EnterTeamNameHere/Aconitum#readme",
   "dependencies": {
     "cross-env": "^7.0.3",
-    "discord.js": "^14.14.1"
+    "discord.js": "^14.14.1",
+    "enquirer": "^2.4.1",
+    "inquirer": "^9.2.15"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

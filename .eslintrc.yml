@@ -80,9 +80,10 @@ rules:
   # eslint-plugin-import
   # cf. https://github.com/import-js/eslint-plugin-import
   import/consistent-type-specifier-style: warn
-  import/extensions:
-    - error
-    - always
+#  import/extensions:
+#    - error
+#    - always
+  import/extensions: off # ts-nodeとかで使い勝手悪い
   import/first: warn
   import/imports-first: warn
   import/newline-after-import: warn
