@@ -1,10 +1,12 @@
-import { readdirSync } from "node:fs";
-import { join } from "path";
+import {readdirSync} from "node:fs";
+import {join} from "path";
 
 import {RESTPostAPIChatInputApplicationCommandsJSONBody} from "discord-api-types/v10";
 import {REST, Routes} from "discord.js";
 
-import config from "./envConf";
+import config from "./envConf.js";
+
+const __dirname = import.meta.dirname;
 
 const globalCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
 const guildCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
@@ -38,12 +40,19 @@ const rest = new REST().setToken(config.token);
         console.error(error);
     }
 
-    const registeredCommands = await rest.get(Routes.applicationCommands(config.clientId));
-    console.log("---command list---");
-    for (const command of registeredCommands) {
+    const registeredGlobalCommands = await rest.get(Routes.applicationCommands(config.clientId));
+    const registeredGuildCommands = await rest.get(Routes.applicationGuildCommands(config.clientId, "1204984761748160542"));
+    console.log("---- global command list ----");
+    for (const command of registeredGlobalCommands) {
         console.log(`/${command.name}`);
         console.log(`  ID:${command.id}`);
         console.log(`  ${command.description}`);
     }
-    console.log("-------------------");
+    console.log("---- guild command list -----");
+    for (const command of registeredGuildCommands) {
+        console.log(`/${command.name}`);
+        console.log(`  ID:${command.id}`);
+        console.log(`  ${command.description}`);
+    }
+    console.log("---------------------------");
 })();

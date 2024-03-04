@@ -106,6 +106,7 @@ rules:
       newlines-between: always
       alphabetize:
         order: asc
+  import/no-mutable-exports: off
 
   # from eslint-config-airbnb-base
   "no-restricted-syntax":
@@ -119,3 +120,5 @@ rules:
       message: "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
     - selector: "WithStatement"
       message: "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+
+  "@typescript-eslint/naming-convention": off

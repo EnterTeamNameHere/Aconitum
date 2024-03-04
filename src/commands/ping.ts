@@ -9,6 +9,6 @@ export const commands: Commands =[
         async execute(interaction: CommandInteraction) {
             await interaction.reply(`Ping : ${interaction.client.ws.ping}ms`);
         },
-        global: false
+        global: true
     }
 ];
