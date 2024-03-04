@@ -9,14 +9,14 @@ import {RESTPostAPIChatInputApplicationCommandsJSONBody} from "discord-api-types
 
 const commandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
 const commandsPath = path.join(__dirname, "commands");
-const commandsFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
+const commandsFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
 const rest = new REST().setToken(config.token);
 
 (async () => {
     console.log(commandsPath);
     for (const file of commandsFiles) {
         const filePath = path.join(commandsPath, file);
-        const commands: Commands = await import(filePath);
+        const commands = (await import(filePath)).commands;
         for (const command of commands) {
             commandArray.push(command.data.toJSON());
         }

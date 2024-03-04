@@ -1,10 +1,10 @@
-import { readdirSync } from "fs";
-import { join } from "path";
+import {readdirSync} from "fs";
+import {join} from "path";
 
 import {Client, CommandInteraction, Events, GatewayIntentBits, Interaction} from "discord.js";
 
 import config from "./envConf";
-import {Command, Commands} from "./interfaces/command.js";
+import {Command} from "./interfaces/command.js";
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
@@ -19,7 +19,7 @@ client.once(Events.ClientReady, async () => {
     console.log(`Type: ${config.type}`);
     for (const file of commandsFiles) {
         const filePath = join(commandsPath, file);
-        const commands: Commands = await import(filePath);
+        const {commands} = await import(filePath);
         for (const command of commands) {
             commandList.set(command.data.name, command);
         }

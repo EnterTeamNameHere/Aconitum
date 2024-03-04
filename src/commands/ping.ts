@@ -1,6 +1,7 @@
-import {CommandInteraction, SlashCommandBuilder, SlashCommandStringOption} from "discord.js";
+import {CommandInteraction, SlashCommandBuilder} from "discord.js";
+import {Commands} from "../interfaces/command";
 
-export = [
+export const commands: Commands =[
     {
         data: new SlashCommandBuilder()
             .setName("ping")
