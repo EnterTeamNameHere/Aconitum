@@ -281,3 +281,5 @@ build/**
 !build/.gitkeep
 env/**
 !env/.gitkeep
+!env/config.tpl.josn
+discord.xml

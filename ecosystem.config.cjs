@@ -2,7 +2,7 @@ module.exports = {
     apps: [
         {
             name: "Aconitum",
-            script: "./build/main.js",
+            script: ".",
             instance_var: "INSTANCE_ID",
             env_dev: {
                 NODE_ENV: "development",

@@ -2,14 +2,17 @@
   "name": "aconitum",
   "version": "0.0.0",
   "description": "",
-  "main": "src/main.ts",
+  "main": "./build/main.js",
+
   "scripts": {
     "prepare": "husky",
     "build": "tsc",
     "pm2-dev": "pm2 start ecosystem.config.cjs --env dev",
     "pm2-prod": "pm2 start ecosystem.config.cjs --env prod",
-    "start-dev": "cross-env NODE_ENV=development node build/main.js",
-    "start-prod": "cross-env NODE_ENV=production node build/main.js"
+    "start-dev": "cross-env NODE_ENV=development node .",
+    "start-prod": "cross-env NODE_ENV=production node .",
+    "run-deb": "cross-env NODE_ENV=development ts-node -P ./tsconfig.json --files src/main.ts",
+    "run-prod": "cross-env NODE_ENV=production ts-node -P ./tsconfig.json --files src/main.ts"
   },
   "repository": {
     "type": "git",
@@ -23,8 +26,7 @@
   "homepage": "https://github.com/EnterTeamNameHere/Aconitum#readme",
   "dependencies": {
     "cross-env": "^7.0.3",
-    "discord.js": "^14.14.1",
-    "ts-node": "^10.9.2"
+    "discord.js": "^14.14.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
@@ -38,9 +40,9 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
-  "type": "module",
   "volta": {
     "node": "20.11.1",
     "npm": "10.5.0"
