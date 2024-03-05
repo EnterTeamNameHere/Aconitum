@@ -17,15 +17,16 @@ const rest = new REST().setToken(config.token);
 (async () => {
     console.log(commandsPath);
     for (const file of commandsFiles) {
-        const filePath = join(commandsPath, file);
-        const {commands} = await import(filePath);
-        for (const command of commands) {
-            if (command.global) {
-                globalCommandArray.push(command.data.toJSON());
-            } else {
-                guildCommandArray.push(command.data.toJSON());
+        const filePath = `file://${join(commandsPath, file)}`;
+        await import(filePath).then(commands => {
+            for (const command of commands.default) {
+                if (command.global) {
+                    globalCommandArray.push(command.data.toJSON());
+                } else {
+                    guildCommandArray.push(command.data.toJSON());
+                }
             }
-        }
+        });
     }
 
     try {
