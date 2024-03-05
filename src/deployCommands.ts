@@ -4,7 +4,7 @@ import {join} from "path";
 import {RESTPostAPIChatInputApplicationCommandsJSONBody} from "discord-api-types/v10";
 import {REST, Routes} from "discord.js";
 
-import config from "./envConf.js";
+import config from "./utils/envConf.js";
 
 const __dirname = import.meta.dirname;
 

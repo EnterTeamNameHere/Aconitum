@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 
-import {Config} from "./interfaces/config.js";
+import {Config} from "../interfaces/config.js";
 
 const __dirname = import.meta.dirname;
-const prodConfigString = fs.readFileSync(path.resolve(__dirname, "../env/config.prod.json"), "utf8");
-const devConfigString = fs.readFileSync(path.resolve(__dirname, "../env/config.dev.json"), "utf8");
+const prodConfigString = fs.readFileSync(path.resolve(__dirname, "../../env/config.prod.json"), "utf8");
+const devConfigString = fs.readFileSync(path.resolve(__dirname, "../../env/config.dev.json"), "utf8");
 const prodConfig: Config = JSON.parse(prodConfigString);
 const devConfig: Config = JSON.parse(devConfigString);
 

@@ -3,8 +3,8 @@ import {join} from "path";
 
 import {Client, CommandInteraction, Events, GatewayIntentBits, Interaction} from "discord.js";
 
-import config from "./envConf.js";
 import {Command} from "./interfaces/command.js";
+import config from "./utils/envConf.js";
 
 const __dirname = import.meta.dirname;
 
@@ -19,11 +19,12 @@ const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".j
 client.once(Events.ClientReady, async () => {
     console.log("Ready");
     for (const file of commandsFiles) {
-        const filePath = join(commandsPath, file);
-        const {commands} = await import(filePath);
-        for (const command of commands) {
-            commandList.set(command.data.name, command);
-        }
+        const filePath = `file://${join(commandsPath, file)}`;
+        await import(filePath).then(commands => {
+            for (const command of commands.default) {
+                commandList.set(command.data.name, command);
+            }
+        });
     }
 });
 
