@@ -1,14 +1,15 @@
 import {CommandInteraction, SlashCommandBuilder} from "discord.js";
+
 import {Commands} from "../interfaces/command";
 
-export const commands: Commands =[
+const commands: Commands = [
     {
-        data: new SlashCommandBuilder()
-            .setName("ping")
-            .setDescription("ping"),
+        data: new SlashCommandBuilder().setName("ping").setDescription("ping"),
         async execute(interaction: CommandInteraction) {
             await interaction.reply(`Ping : ${interaction.client.ws.ping}ms`);
         },
-        global: true
-    }
+        global: true,
+    },
 ];
+
+export default commands;

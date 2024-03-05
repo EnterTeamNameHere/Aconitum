@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/EnterTeamNameHere/Aconitum#readme",
   "dependencies": {
+    "@vladfrangu/async_event_emitter": "^2.2.4",
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.37.71",
     "discord.js": "^14.12.1",
@@ -51,7 +52,7 @@
     "npm": "10.5.0"
   },
   "lint-staged": {
-    "src/*.{ts,mts,mts}": "eslint --fix",
-    "src/*.{ts,cts,mts,json,yaml,yml,md}": "prettier --write"
+    "src/**/*.{ts,mts,mts}": "eslint --fix",
+    "src/**/*.{ts,cts,mts,json,yaml,yml,md}": "prettier --write"
   }
 }
