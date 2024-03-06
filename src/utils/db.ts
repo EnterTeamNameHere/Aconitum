@@ -53,7 +53,7 @@ const insertOne = async function f<DocumentType extends Document>(
     try {
         const collection = db.collection<DocumentType>(collectionName);
         await collection.insertOne(document);
-        console.log("Document inset is successful");
+        console.log("Document insert is successful");
     } catch (e) {
         throw errorHandler(e);
     }
