@@ -11,15 +11,19 @@ export interface Connection {
     teams: {
         send: string;
         recv: string;
+        active: boolean;
     };
     line: {
         id: string;
         token: string;
+        active: boolean;
     };
     slack: {
         send: string;
         recv: string;
+        active: boolean;
     };
     guild: string;
     channel: string;
+    webhook: string;
 }

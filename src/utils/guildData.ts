@@ -1,20 +1,24 @@
-import {DiscordAPIError} from "discord.js";
-import type {Client} from "discord.js";
-import type {ObjectId} from "mongodb";
+import {DiscordAPIError } from "discord.js";
+import type {Client,Snowflake} from "discord.js";
+import {ObjectId} from "mongodb";
 
 import {Guild} from "../interfaces/dbInterfaces.js";
 
+import {removeGuild} from "./connectionData.js";
 import {deleteMany, find, insertOne, isIncludes} from "./db.js";
 
-const insert = async function f(guildId: string) {
+const insert = async function f(guildId: Snowflake): Promise<ObjectId> {
+    const id = new ObjectId();
     const insertData: Guild = {
+        _id: id,
         guildId,
         connections: new Array<ObjectId>(),
     };
     await insertOne<Guild>("guild", insertData);
+    return id;
 };
 
-const remove = async function f(guildId: string) {
+const remove = async function f(guildId: Snowflake) {
     const filter = {
         guildId,
     };
@@ -29,6 +33,7 @@ const startUp = async function f(client: Client) {
             } catch (e) {
                 if (e instanceof DiscordAPIError && (e.code === 10004 || e.code === "10004")) {
                     await remove(guild.guildId);
+                    await removeGuild(guild.guildId);
                 } else {
                     throw e;
                 }

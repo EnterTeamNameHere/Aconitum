@@ -3,3 +3,5 @@
 /workspace.xml
 # エディターベースの HTTP クライアントリクエスト
 /httpRequests/
+# GitHub Copilot persisted chat sessions
+/copilot/chatSessions
