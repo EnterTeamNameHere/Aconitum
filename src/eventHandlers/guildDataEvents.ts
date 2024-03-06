@@ -1,6 +1,6 @@
 import {Events, Guild} from "discord.js";
 
-import Procs from "../interfaces/clientProcs.js";
+import Procs from "../interfaces/eventHandler.js";
 import {insert, remove} from "../utils/guildData.js";
 
 const procs: Procs = function execute(client): void {

@@ -1,5 +1,5 @@
-import {DiscordAPIError } from "discord.js";
-import type {Client,Snowflake} from "discord.js";
+import type {Client, Snowflake} from "discord.js";
+import {DiscordAPIError} from "discord.js";
 import {ObjectId} from "mongodb";
 
 import {Guild} from "../interfaces/dbInterfaces.js";
