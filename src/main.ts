@@ -1,5 +1,5 @@
-import { readdirSync } from "fs";
-import { join } from "path";
+import {readdirSync} from "fs";
+import {join} from "path";
 
 import {Client, Events, GatewayIntentBits} from "discord.js";
 
