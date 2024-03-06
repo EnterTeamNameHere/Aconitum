@@ -18,7 +18,10 @@ const commands: Commands = [
             .setDMPermission(false),
         async execute(interaction: ChatInputCommandInteraction) {
             await interaction.deferReply({ephemeral: true});
-            await insert(interaction.guildId!, interaction.options.getChannel("channel")?.id ?? interaction.channelId);
+            const id = (
+                await insert(interaction.guildId!, interaction.options.getChannel("channel")?.id ?? interaction.channelId)
+            ).toHexString();
+            await interaction.editReply(`コネクションを作成しました\nID: ${id}`);
         },
         global: true,
     },
