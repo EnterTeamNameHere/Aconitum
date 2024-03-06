@@ -28,7 +28,7 @@ const startUp = async function f(client: Client) {
                 await client.guilds.fetch(guild.guildId);
             } catch (e) {
                 if (e instanceof DiscordAPIError && (e.code === 10004 || e.code === "10004")) {
-                    await deleteMany<Guild>("guild", {guildId: guild.guildId});
+                    await remove(guild.guildId);
                 } else {
                     throw e;
                 }
