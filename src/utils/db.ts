@@ -1,4 +1,4 @@
-import { Filter,  MongoClient  } from "mongodb";
+import {Filter, MongoClient} from "mongodb";
 import type {Document, MatchKeysAndValues, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
 
 import config from "./envConf.js";
@@ -40,6 +40,7 @@ const update = async function f<DocumentType extends Document>(
     try {
         const collection = db.collection<DocumentType>(collectionName);
         await collection.updateOne(filter, updateData);
+        console.log("Collection update is successful");
     } catch (e) {
         throw errorHandler(e);
     }
@@ -52,6 +53,7 @@ const insertOne = async function f<DocumentType extends Document>(
     try {
         const collection = db.collection<DocumentType>(collectionName);
         await collection.insertOne(document);
+        console.log("Document insert is successful");
     } catch (e) {
         throw errorHandler(e);
     }
@@ -64,6 +66,7 @@ const insertMany = async function f<DocumentType extends Document>(
     try {
         const collection = db.collection<DocumentType>(collectionName);
         await collection.insertMany(document);
+        console.log("Documents insert is successful");
     } catch (e) {
         throw errorHandler(e);
     }
@@ -89,6 +92,7 @@ const deleteMany = async function f<DocumentType extends Document>(collectionNam
     try {
         const collection = db.collection<DocumentType>(collectionName);
         await collection.deleteMany(filter);
+        console.log("Documents delete is successful");
     } catch (e) {
         throw errorHandler(e);
     }
