@@ -3,4 +3,5 @@ export type Config = {
     token: string;
     clientId: string;
     guildId: string;
+    db: string;
 };
