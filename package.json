@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "prepare": "husky",
-    "build": "tsc",
+    "build": "rimraf build/ && tsc",
     "pm2-dev": "pm2 start ecosystem.config.cjs --env dev",
     "pm2-prod": "pm2 start ecosystem.config.cjs --env prod",
     "start-dev": "cross-env NODE_ENV=development node .",
@@ -31,7 +31,8 @@
     "discord.js": "^14.12.1",
     "enquirer": "^2.4.1",
     "inquirer": "^9.2.15",
-    "mongodb": "^6.4.0"
+    "mongodb": "^6.4.0",
+    "rimraf": "^5.0.5"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.7",
