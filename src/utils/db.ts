@@ -1,5 +1,5 @@
-import {Filter, MongoClient} from "mongodb";
 import type {Document, MatchKeysAndValues, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
+import {Filter, MongoClient} from "mongodb";
 
 import config from "./envConf.js";
 

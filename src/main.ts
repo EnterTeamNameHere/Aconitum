@@ -4,8 +4,9 @@ import {join} from "path";
 import {Client, Events, GatewayIntentBits} from "discord.js";
 
 import {Command} from "./interfaces/command.js";
+import {startUp as connectionStarUp} from "./utils/connectionData.js";
 import config from "./utils/envConf.js";
-import {startUp} from "./utils/guildData.js";
+import {startUp as guildStartUp} from "./utils/guildData.js";
 
 const __dirname = import.meta.dirname;
 
@@ -26,7 +27,8 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
         });
     }
 
-    await startUp(client);
+    await guildStartUp(client);
+    await connectionStarUp(client);
 
     console.log("Ready");
 });

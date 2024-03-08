@@ -1,10 +1,11 @@
-import {CommandInteraction, Events, Interaction} from "discord.js";
+import { Events, Interaction} from "discord.js";
+import type {ChatInputCommandInteraction} from "discord.js";
 
-import Procs from "../interfaces/clientProcs.js";
+import Procs from "../interfaces/eventHandler.js";
 import commandList from "../main.js";
 
 const procs: Procs = function execute(client): void {
-    async function commandProcess(interaction: CommandInteraction) {
+    async function commandProcess(interaction: ChatInputCommandInteraction) {
         const {commandName} = interaction;
         const command = commandList.get(commandName);
         if (command) {
@@ -15,7 +16,7 @@ const procs: Procs = function execute(client): void {
     }
 
     client.on<Events.InteractionCreate>(Events.InteractionCreate, async (interaction: Interaction) => {
-        if (interaction.isCommand()) {
+        if (interaction.isChatInputCommand()) {
             await commandProcess(interaction);
         }
     });
