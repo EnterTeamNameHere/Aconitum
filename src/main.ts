@@ -11,7 +11,7 @@ import {startUp as guildStartUp} from "./utils/guildData.js";
 const __dirname = import.meta.dirname;
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 
 const commandList = new Map<string, Command>();
