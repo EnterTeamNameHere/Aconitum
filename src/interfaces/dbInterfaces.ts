@@ -1,29 +1,36 @@
 import {ObjectId} from "mongodb";
 
 export interface Guild {
-    _id?: ObjectId;
+    _id: ObjectId;
     guildId: string;
-    connections: Array<ObjectId>;
 }
 
 export interface Connection {
-    _id?: ObjectId;
-    teams: {
-        send: string;
-        recv: string;
-        active: boolean;
+    _id: ObjectId;
+    guildId: string;
+    channelId: string;
+    name: string;
+    platform: Platform;
+}
+
+export type Platform = "teams" | "line" | "slack";
+
+export interface TeamsConnection extends Connection {
+    data: {
+        sendWebhook: string;
     };
-    line: {
+}
+
+export interface LineConnection extends Connection {
+    data: {
         id: string;
         token: string;
-        active: boolean;
     };
-    slack: {
+}
+
+export interface SlackConnection extends Connection {
+    data: {
         send: string;
         recv: string;
-        active: boolean;
     };
-    guild: string;
-    channel: string;
-    webhook: string;
 }

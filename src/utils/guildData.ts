@@ -1,55 +1,34 @@
-import type {Client, Snowflake} from "discord.js";
-import {DiscordAPIError} from "discord.js";
 import {ObjectId} from "mongodb";
 
-import {Guild} from "../interfaces/dbInterfaces.js";
+import {Connection, Guild} from "../interfaces/dbInterfaces.js";
 
-import {removeGuild} from "./connectionData.js";
-import {deleteMany, find, insertOne, isIncludes} from "./db.js";
+import { deleteMany, find, findOne, insertOne, isIncludes } from "./db.js";
 
-const insert = async function f(guildId: Snowflake): Promise<ObjectId> {
-    const id = new ObjectId();
-    const insertData: Guild = {
-        _id: id,
-        guildId,
-        connections: new Array<ObjectId>(),
-    };
-    await insertOne<Guild>("guild", insertData);
-    return id;
-};
+export default {
+    findAll: async function f(): Promise<Array<Guild>> {
+        return find<Guild>("guilds", {});
+    },
 
-const remove = async function f(guildId: Snowflake) {
-    const filter = {
-        guildId,
-    };
-    await deleteMany<Guild>("guild", filter);
-};
-
-const startUp = async function f(client: Client) {
-    try {
-        for (const guild of await find<Guild>("guild", {})) {
-            try {
-                await client.guilds.fetch(guild.guildId);
-            } catch (e) {
-                if (e instanceof DiscordAPIError && (e.code === 10004 || e.code === "10004")) {
-                    await remove(guild.guildId);
-                    await removeGuild(guild.guildId);
-                } else {
-                    throw e;
-                }
-            }
+    findUnique: async function f(guildId: string): Promise<Guild> {
+        const result = await findOne<Guild>("guilds", {guildId});
+        if (result === null) {
+            throw new Error(`guild ${guildId} not found`);
         }
+        return result;
+    },
 
-        const guilds = client.guilds.cache;
-        for (const guild of guilds.keys()) {
-            if (!(await isIncludes<Guild>("guild", {guildId: guild}))) {
-                await insert(guild);
-            }
+    register: async function f(guildId: string): Promise<void> {
+        if (!(await isIncludes<Guild>("guilds", {guildId}))) {
+            const guild: Guild = {
+                _id: new ObjectId(),
+                guildId,
+            };
+            await insertOne("guilds", guild);
         }
-    } catch (e) {
-        console.error("Error occurred at start.");
-        throw e;
-    }
-};
+    },
 
-export {insert, remove, startUp};
+    remove: async function f(guildId: string): Promise<void> {
+        await deleteMany<Guild>("guilds", {guildId});
+        await deleteMany<Connection>("connections", {guildId});
+    },
+};

@@ -23,6 +23,18 @@ const find = async function f<DocumentType extends Document>(
     }
 };
 
+const findOne = async function f<DocumentType extends Document>(
+    collectionName: string,
+    filter: Filter<DocumentType>,
+): Promise<DocumentType | null> {
+    try {
+        const collection = db.collection<DocumentType>(collectionName);
+        return await collection.findOne<DocumentType>(filter);
+    } catch (e) {
+        throw errorHandler(e);
+    }
+};
+
 const isIncludes = async function f<DocumentType extends Document>(collectionName: string, filter: Filter<DocumentType>): Promise<boolean> {
     try {
         const found = await find<DocumentType>(collectionName, filter);
@@ -108,4 +120,4 @@ const close = async function f() {
     console.log("DB client is closed");
 };
 
-export {find, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close};
+export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close};
