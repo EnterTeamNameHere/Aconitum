@@ -35,12 +35,12 @@ const commands: Commands = [
                         sendWebhook: teamsWebhook,
                     },
                 };
-                connectionData.register<TeamsConnection>(connection);
+                await connectionData.register<TeamsConnection>(connection);
 
                 await interaction.reply({content: "登録しました．", ephemeral: true});
             } catch (e) {
                 await interaction.reply({content: "実行中にエラーが発生しました．", ephemeral: true});
-                console.log(`[ERR]: ${e}`);
+                console.error(`[ERR]: ${e}`);
             }
         },
         global: true,
