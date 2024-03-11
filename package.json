@@ -26,6 +26,7 @@
   "homepage": "https://github.com/EnterTeamNameHere/Aconitum#readme",
   "dependencies": {
     "@vladfrangu/async_event_emitter": "^2.2.4",
+    "axios": "^1.6.7",
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.37.71",
     "discord.js": "^14.12.1",

@@ -1,5 +1,5 @@
-import {Filter, MongoClient} from "mongodb";
 import type {Document, MatchKeysAndValues, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
+import {Filter, MongoClient} from "mongodb";
 
 import config from "./envConf.js";
 
@@ -18,6 +18,18 @@ const find = async function f<DocumentType extends Document>(
     try {
         const collection = db.collection<DocumentType>(collectionName);
         return await collection.find<DocumentType>(filter).toArray();
+    } catch (e) {
+        throw errorHandler(e);
+    }
+};
+
+const findOne = async function f<DocumentType extends Document>(
+    collectionName: string,
+    filter: Filter<DocumentType>,
+): Promise<DocumentType | null> {
+    try {
+        const collection = db.collection<DocumentType>(collectionName);
+        return await collection.findOne<DocumentType>(filter);
     } catch (e) {
         throw errorHandler(e);
     }
@@ -108,4 +120,4 @@ const close = async function f() {
     console.log("DB client is closed");
 };
 
-export {find, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close};
+export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close};

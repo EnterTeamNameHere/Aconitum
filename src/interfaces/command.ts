@@ -1,8 +1,9 @@
-import {CommandInteraction, SlashCommandBuilder} from "discord.js";
+import {SlashCommandBuilder} from "discord.js";
+import type {ChatInputCommandInteraction} from "discord.js";
 
 type Command = {
-    data: SlashCommandBuilder;
-    execute: (interaction: CommandInteraction) => Promise<void>;
+    data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandBuilder;
+    execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
     global: boolean;
 };
 type Commands = Array<Command>;

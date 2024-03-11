@@ -1,16 +1,17 @@
 import {readdirSync} from "fs";
 import {join} from "path";
 
-import {Client, Events, GatewayIntentBits} from "discord.js";
+import {Client, DiscordAPIError, Events,GatewayIntentBits} from "discord.js";
 
 import {Command} from "./interfaces/command.js";
+import connectionData from "./utils/connectionData.js";
 import config from "./utils/envConf.js";
-import {startUp} from "./utils/guildData.js";
+import guildData from "./utils/guildData.js";
 
 const __dirname = import.meta.dirname;
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 
 const commandList = new Map<string, Command>();
@@ -26,7 +27,31 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
         });
     }
 
-    await startUp(client);
+    try {
+        for (const {guildId} of await guildData.findAll()) {
+            try {
+                await client.guilds.fetch(guildId);
+            } catch (e) {
+                if (e instanceof DiscordAPIError && (e.code === 10004 || e.code === "10004")) {
+                    await guildData.remove(guildId);
+                } else {
+                    throw e;
+                }
+            }
+        }
+        for (const guildId of client.guilds.cache.keys()) {
+            await guildData.register(guildId);
+        }
+
+        for (const collection of await connectionData.find({})) {
+            if (client.channels.cache.get(collection.channelId) === undefined) {
+                await connectionData.remove(collection._id);
+            }
+        }
+    } catch (e) {
+        console.error("Error occurred at start.");
+        throw e;
+    }
 
     console.log("Ready");
 });
