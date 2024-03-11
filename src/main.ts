@@ -1,7 +1,9 @@
 import {readdirSync} from "fs";
 import {join} from "path";
 
-import {Client, DiscordAPIError, Events,GatewayIntentBits} from "discord.js";
+import lineSDK from "@line/bot-sdk";
+import {Client, DiscordAPIError, Events, GatewayIntentBits} from "discord.js";
+import express from "express";
 
 import {Command} from "./interfaces/command.js";
 import connectionData from "./utils/connectionData.js";
@@ -13,6 +15,9 @@ const __dirname = import.meta.dirname;
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
+
+const lineClient = new lineSDK.Client({channelAccessToken: config.line.channelAccessToken, channelSecret: config.line.channelSecret});
+const APIServer = express();
 
 const commandList = new Map<string, Command>();
 const commandsPath = join(__dirname, "commands");
@@ -57,6 +62,35 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
 });
 export default commandList;
 
+const lineEventHandler = async (event: lineSDK.WebhookEvent): Promise<lineSDK.MessageAPIResponseBase | undefined> => {
+    if (event.type !== "message" || event.message.type !== "text") {
+        return;
+    }
+    const response: lineSDK.TextMessage = {
+        type: "text",
+        text: event.message.text,
+    };
+    await lineClient.replyMessage(event.replyToken, response);
+};
+
+APIServer.post(
+    "/line-webhook",
+    lineSDK.middleware({channelAccessToken: config.line.channelAccessToken, channelSecret: config.line.channelSecret}),
+    async (req: express.Request, res: express.Response): Promise<express.Response> => {
+        for (const event of req.body.events) {
+            try {
+                await lineEventHandler(event);
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    console.error(e);
+                }
+                return res.status(500);
+            }
+        }
+        return res.status(200);
+    },
+);
+
 (async () => {
     const handlersPath = join(__dirname, "eventHandlers");
     const handlersFiles = readdirSync(handlersPath).filter(file => file.endsWith(".js"));
@@ -69,3 +103,4 @@ export default commandList;
 })();
 
 client.login(config.token);
+APIServer.listen(config.line.port, () => console.log(`API Server is Ready! (at http://localhost:${config.line.port}/)`));
