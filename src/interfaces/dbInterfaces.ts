@@ -24,6 +24,7 @@ export interface Connection {
 }
 
 export interface DiscordConnection extends Connection {
+    platform: "discord";
     data: {
         channelId: Snowflake;
         channelWebhook: string;
@@ -31,12 +32,14 @@ export interface DiscordConnection extends Connection {
 }
 
 export interface TeamsConnection extends Connection {
+    platform: "teams";
     data: {
         sendWebhook: string;
     };
 }
 
 export interface LineConnection extends Connection {
+    platform: "line";
     data: {
         id: string;
         token: string;
@@ -44,6 +47,7 @@ export interface LineConnection extends Connection {
 }
 
 export interface SlackConnection extends Connection {
+    platform: "slack";
     data: {
         send: string;
         recv: string;

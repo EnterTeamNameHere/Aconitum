@@ -1,5 +1,5 @@
-import {SlashCommandBuilder} from "discord.js";
 import type {ChatInputCommandInteraction} from "discord.js";
+import {SlashCommandBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
 
 import {Commands} from "../interfaces/command";

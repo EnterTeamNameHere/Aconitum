@@ -131,9 +131,8 @@ const close = async function f() {
 const checkStringId = async function f(id: string) {
     if (id.match(/^[A-Za-z0-9]*$/) && id.length === 24) {
         return true;
-    } 
-        return false;
-    
+    }
+    return false;
 };
 
 export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close, checkStringId};

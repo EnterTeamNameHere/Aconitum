@@ -1,8 +1,8 @@
 import axios from "axios";
 import {Events, GuildTextBasedChannel} from "discord.js";
 
-import { TeamsConnection} from "../interfaces/dbInterfaces.js";
 import type {DiscordConnection} from "../interfaces/dbInterfaces.js";
+import {TeamsConnection} from "../interfaces/dbInterfaces.js";
 import Procs from "../interfaces/eventHandler.js";
 import connectionData from "../utils/connectionData.js";
 
@@ -10,9 +10,7 @@ const procs: Procs = function execute(client): void {
     client.on<Events.MessageCreate>(Events.MessageCreate, async message => {
         await (async function teamsReacter() {
             const discordChannels = await connectionData.find<DiscordConnection>({
-                data: {
-                    channelId: message.channelId,
-                },
+                "data.channelId": message.channelId,
                 platform: "discord",
             });
             if (discordChannels.length > 0) {

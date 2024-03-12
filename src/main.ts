@@ -40,4 +40,6 @@ export default commandList;
     }
 })();
 
-client.login(config.token);
+(async () => {
+    await client.login(config.token);
+})();
