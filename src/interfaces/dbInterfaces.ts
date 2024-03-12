@@ -1,19 +1,34 @@
+import type {Snowflake} from "discord-api-types/globals.js";
 import {ObjectId} from "mongodb";
 
-export interface Guild {
-    _id: ObjectId;
-    guildId: string;
+export type CollectionName = "guilds" | "clusters" | "connections";
+
+// export interface Guild {
+//     _id?: ObjectId;
+//     id: Snowflake;
+// }
+
+export interface Cluster {
+    _id?: ObjectId;
+    guildId: Snowflake;
+    name: string;
 }
 
+export type Platform = "discord" | "teams" | "line" | "slack";
+
 export interface Connection {
-    _id: ObjectId;
-    guildId: string;
-    channelId: string;
+    _id?: ObjectId;
+    clusterId: ObjectId;
     name: string;
     platform: Platform;
 }
 
-export type Platform = "teams" | "line" | "slack";
+export interface DiscordConnection extends Connection {
+    data: {
+        channelId: Snowflake;
+        channelWebhook: string;
+    };
+}
 
 export interface TeamsConnection extends Connection {
     data: {

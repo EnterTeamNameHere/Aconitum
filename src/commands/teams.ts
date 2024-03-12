@@ -11,13 +11,13 @@ const commands: Commands = [
             .setName("teams-connect")
             .setDescription("Teamsのチャンネルを接続します")
             .setDMPermission(false)
-            .addChannelOption(option => option.setName("discord-channel").setDescription("Discord側のチャンネル").setRequired(true))
+            .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true))
             .addStringOption(option => option.setName("teams-webhook").setDescription("Teams側のWebhookURI").setRequired(true))
             .addStringOption(option => option.setName("connection-name").setDescription("接続の名前").setRequired(true)),
         async execute(interaction: ChatInputCommandInteraction) {
             try {
                 /* get options */
-                const discordChannel = interaction.options.getChannel("discord-channel", true).toString();
+                const clusterId = interaction.options.getChannel("cluster-id", true).toString();
                 const teamsWebhook = interaction.options.getString("teams-webhook", true);
                 const connectionName = interaction.options.getString("connection-name", true);
 
@@ -27,8 +27,7 @@ const commands: Commands = [
                 }
                 const connection: TeamsConnection = {
                     _id: new ObjectId(),
-                    guildId: interaction.guildId,
-                    channelId: discordChannel.replace(/\D/g, ""),
+                    clusterId: new ObjectId(clusterId),
                     name: connectionName,
                     platform: "teams",
                     data: {
