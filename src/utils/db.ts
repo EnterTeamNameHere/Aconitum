@@ -128,4 +128,12 @@ const close = async function f() {
     console.log("DB client is closed");
 };
 
-export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close};
+const checkStringId = async function f(id: string) {
+    if (id.match(/^[A-Za-z0-9]*$/) && id.length === 24) {
+        return true;
+    } 
+        return false;
+    
+};
+
+export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close, checkStringId};

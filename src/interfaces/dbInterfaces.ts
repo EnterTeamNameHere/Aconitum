@@ -1,7 +1,7 @@
 import type {Snowflake} from "discord-api-types/globals.js";
 import {ObjectId} from "mongodb";
 
-export type CollectionName = "guilds" | "clusters" | "connections";
+export type CollectionName = "clusters" | "connections";
 
 // export interface Guild {
 //     _id?: ObjectId;
