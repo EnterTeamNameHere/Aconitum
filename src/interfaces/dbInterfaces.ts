@@ -3,11 +3,6 @@ import {ObjectId} from "mongodb";
 
 export type CollectionName = "clusters" | "connections";
 
-// export interface Guild {
-//     _id?: ObjectId;
-//     id: Snowflake;
-// }
-
 export interface Cluster {
     _id?: ObjectId;
     guildId: Snowflake;
