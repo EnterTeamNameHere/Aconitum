@@ -9,6 +9,7 @@ import {Command} from "./interfaces/command.js";
 import connectionData from "./utils/connectionData.js";
 import config from "./utils/envConf.js";
 import guildData from "./utils/guildData.js";
+import line from "./utils/line.js";
 
 const __dirname = import.meta.dirname;
 
@@ -62,24 +63,13 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
 });
 export default commandList;
 
-const lineEventHandler = async (event: lineSDK.WebhookEvent): Promise<lineSDK.MessageAPIResponseBase | undefined> => {
-    if (event.type !== "message" || event.message.type !== "text") {
-        return;
-    }
-    const response: lineSDK.TextMessage = {
-        type: "text",
-        text: event.message.text,
-    };
-    await lineClient.replyMessage(event.replyToken, response);
-};
-
 APIServer.post(
     "/line-webhook",
     lineSDK.middleware({channelAccessToken: config.line.channelAccessToken, channelSecret: config.line.channelSecret}),
     async (req: express.Request, res: express.Response): Promise<express.Response> => {
         for (const event of req.body.events) {
             try {
-                await lineEventHandler(event);
+                await line.platformEventHandler(lineClient, event);
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     console.error(e);
