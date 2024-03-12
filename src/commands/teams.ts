@@ -3,6 +3,7 @@ import {ObjectId} from "mongodb";
 
 import {Commands} from "../interfaces/command";
 import {TeamsConnection} from "../interfaces/dbInterfaces.js";
+import clusterData from "../utils/clusterData.js";
 import connectionData from "../utils/connectionData.js";
 
 const commands: Commands = [
@@ -11,25 +12,21 @@ const commands: Commands = [
             .setName("teams-connect")
             .setDescription("Teamsのチャンネルを接続します")
             .setDMPermission(false)
-            .addChannelOption(option => option.setName("discord-channel").setDescription("Discord側のチャンネル").setRequired(true))
+            .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true))
             .addStringOption(option => option.setName("teams-webhook").setDescription("Teams側のWebhookURI").setRequired(true))
             .addStringOption(option => option.setName("connection-name").setDescription("接続の名前").setRequired(true)),
         async execute(interaction: ChatInputCommandInteraction) {
             try {
-                /* get options */
-                const discordChannel = interaction.options.getChannel("discord-channel", true).toString();
-                const teamsWebhook = interaction.options.getString("teams-webhook", true);
-                const connectionName = interaction.options.getString("connection-name", true);
+                await interaction.deferReply({ephemeral: true});
 
-                /* register connection data */
-                if (interaction.guildId === null) {
-                    throw new Error("guildId is null");
+                const teamsWebhook = interaction.options.getString("teams-webhook", true);
+
+                const connectionBase = await connectionData.createConnectionData(interaction, "teams");
+                if (connectionBase === null) {
+                    return;
                 }
                 const connection: TeamsConnection = {
-                    _id: new ObjectId(),
-                    guildId: interaction.guildId,
-                    channelId: discordChannel.replace(/\D/g, ""),
-                    name: connectionName,
+                    ...connectionBase,
                     platform: "teams",
                     data: {
                         sendWebhook: teamsWebhook,
@@ -37,9 +34,15 @@ const commands: Commands = [
                 };
                 await connectionData.register<TeamsConnection>(connection);
 
-                await interaction.reply({content: "登録しました．", ephemeral: true});
+                const cluster = await clusterData.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
+                if (cluster === null) {
+                    throw new Error("cluster not found");
+                }
+                await interaction.editReply({
+                    content: `${interaction.options.getString("connection-name")}をクラスター${cluster.name}に登録しました。`,
+                });
             } catch (e) {
-                await interaction.reply({content: "実行中にエラーが発生しました．", ephemeral: true});
+                await interaction.editReply({content: "実行中にエラーが発生しました．"});
                 console.error(`[ERR]: ${e}`);
             }
         },
@@ -48,7 +51,8 @@ const commands: Commands = [
     {
         data: new SlashCommandBuilder().setName("teams-disconnect").setDescription("Teamsのチャンネルを切断します"),
         async execute(interaction: CommandInteraction) {
-            await interaction.reply("not impremented yet");
+            await interaction.deferReply({ephemeral: true});
+            await interaction.editReply("not impremented yet");
         },
         global: true,
     },

@@ -1,5 +1,5 @@
-import { Events, Interaction} from "discord.js";
 import type {ChatInputCommandInteraction} from "discord.js";
+import {Events, Interaction} from "discord.js";
 
 import Procs from "../interfaces/eventHandler.js";
 import commandList from "../main.js";
