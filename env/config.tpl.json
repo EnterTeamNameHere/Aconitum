@@ -3,5 +3,10 @@
     "token": "",
     "clientId": "",
     "guildId": "",
-    "db": ""
+    "db": "",
+    "line": {
+        "channelAccessToken": "",
+        "channelSecret": "",
+        "port": 0
+    }
 }

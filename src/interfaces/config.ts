@@ -4,4 +4,9 @@ export type Config = {
     clientId: string;
     guildId: string;
     db: string;
+    line: {
+        channelAccessToken: string;
+        channelSecret: string;
+        port: number;
+    };
 };
