@@ -2,13 +2,11 @@ import {readdirSync} from "fs";
 import {join} from "path";
 
 import lineSDK from "@line/bot-sdk";
-import {Client, DiscordAPIError, Events, GatewayIntentBits} from "discord.js";
+import {Client, Events, GatewayIntentBits} from "discord.js";
 import express from "express";
 
 import {Command} from "./interfaces/command.js";
-import connectionData from "./utils/connectionData.js";
 import config from "./utils/envConf.js";
-import guildData from "./utils/guildData.js";
 import line from "./utils/line.js";
 
 const __dirname = import.meta.dirname;
@@ -31,32 +29,6 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
                 commandList.set(command.data.name, command);
             }
         });
-    }
-
-    try {
-        for (const {guildId} of await guildData.findAll()) {
-            try {
-                await client.guilds.fetch(guildId);
-            } catch (e) {
-                if (e instanceof DiscordAPIError && (e.code === 10004 || e.code === "10004")) {
-                    await guildData.remove(guildId);
-                } else {
-                    throw e;
-                }
-            }
-        }
-        for (const guildId of client.guilds.cache.keys()) {
-            await guildData.register(guildId);
-        }
-
-        for (const collection of await connectionData.find({})) {
-            if (client.channels.cache.get(collection.channelId) === undefined) {
-                await connectionData.remove(collection._id);
-            }
-        }
-    } catch (e) {
-        console.error("Error occurred at start.");
-        throw e;
     }
 
     console.log("Ready");
@@ -92,5 +64,7 @@ APIServer.post(
     }
 })();
 
-client.login(config.token);
-APIServer.listen(config.line.port, () => console.log(`API Server is Ready! (at http://localhost:${config.line.port}/)`));
+(async () => {
+    await client.login(config.token);
+    APIServer.listen(config.line.port, () => console.log(`API Server is Ready! (at http://localhost:${config.line.port}/)`));
+})();

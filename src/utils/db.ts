@@ -1,6 +1,8 @@
 import type {Document, MatchKeysAndValues, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
 import {Filter, MongoClient} from "mongodb";
 
+import type {CollectionName} from "../interfaces/dbInterfaces.js";
+
 import config from "./envConf.js";
 
 let client = new MongoClient(config.db);
@@ -12,7 +14,7 @@ function errorHandler(error: unknown): unknown {
 }
 
 const find = async function f<DocumentType extends Document>(
-    collectionName: string,
+    collectionName: CollectionName,
     filter: Filter<DocumentType>,
 ): Promise<Array<DocumentType>> {
     try {
@@ -24,7 +26,7 @@ const find = async function f<DocumentType extends Document>(
 };
 
 const findOne = async function f<DocumentType extends Document>(
-    collectionName: string,
+    collectionName: CollectionName,
     filter: Filter<DocumentType>,
 ): Promise<DocumentType | null> {
     try {
@@ -35,7 +37,10 @@ const findOne = async function f<DocumentType extends Document>(
     }
 };
 
-const isIncludes = async function f<DocumentType extends Document>(collectionName: string, filter: Filter<DocumentType>): Promise<boolean> {
+const isIncludes = async function f<DocumentType extends Document>(
+    collectionName: CollectionName,
+    filter: Filter<DocumentType>,
+): Promise<boolean> {
     try {
         const found = await find<DocumentType>(collectionName, filter);
         return found.length > 0;
@@ -45,7 +50,7 @@ const isIncludes = async function f<DocumentType extends Document>(collectionNam
 };
 
 const update = async function f<DocumentType extends Document>(
-    collectionName: string,
+    collectionName: CollectionName,
     filter: Filter<DocumentType>,
     updateData: UpdateFilter<DocumentType> | Array<Document>,
 ): Promise<void> {
@@ -59,7 +64,7 @@ const update = async function f<DocumentType extends Document>(
 };
 
 const insertOne = async function f<DocumentType extends Document>(
-    collectionName: string,
+    collectionName: CollectionName,
     document: OptionalUnlessRequiredId<DocumentType>,
 ): Promise<void> {
     try {
@@ -72,7 +77,7 @@ const insertOne = async function f<DocumentType extends Document>(
 };
 
 const insertMany = async function f<DocumentType extends Document>(
-    collectionName: string,
+    collectionName: CollectionName,
     document: Array<OptionalUnlessRequiredId<DocumentType>>,
 ): Promise<void> {
     try {
@@ -85,7 +90,7 @@ const insertMany = async function f<DocumentType extends Document>(
 };
 
 const updateOrInsert = async function f<DocumentType extends Document>(
-    collectionName: string,
+    collectionName: CollectionName,
     filter: Filter<DocumentType>,
     document: OptionalUnlessRequiredId<DocumentType>,
 ) {
@@ -100,7 +105,10 @@ const updateOrInsert = async function f<DocumentType extends Document>(
     }
 };
 
-const deleteMany = async function f<DocumentType extends Document>(collectionName: string, filter: Filter<DocumentType>): Promise<void> {
+const deleteMany = async function f<DocumentType extends Document>(
+    collectionName: CollectionName,
+    filter: Filter<DocumentType>,
+): Promise<void> {
     try {
         const collection = db.collection<DocumentType>(collectionName);
         await collection.deleteMany(filter);
@@ -120,4 +128,11 @@ const close = async function f() {
     console.log("DB client is closed");
 };
 
-export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close};
+const checkStringId = async function f(id: string) {
+    if (id.match(/^[A-Za-z0-9]*$/) && id.length === 24) {
+        return true;
+    }
+    return false;
+};
+
+export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close, checkStringId};

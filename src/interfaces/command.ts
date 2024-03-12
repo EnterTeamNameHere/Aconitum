@@ -1,5 +1,5 @@
-import {SlashCommandBuilder} from "discord.js";
 import type {ChatInputCommandInteraction} from "discord.js";
+import {SlashCommandBuilder} from "discord.js";
 
 type Command = {
     data: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandBuilder;
