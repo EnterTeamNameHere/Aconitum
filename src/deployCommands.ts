@@ -11,7 +11,7 @@ const __dirname = import.meta.dirname;
 const globalCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
 const guildCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
 const commandsPath = join(__dirname, "commands");
-const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js") || file.endsWith(".ts"));
 const rest = new REST().setToken(config.token);
 
 (async () => {
