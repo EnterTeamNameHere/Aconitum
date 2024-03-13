@@ -15,6 +15,7 @@ parserOptions:
   project: tsconfig.json
 plugins:
   - '@typescript-eslint'
+  - unused-imports
 
 # 独自定義ルール
 #   設計に影響するもの(要手動修正)      - error
@@ -123,3 +124,4 @@ rules:
       message: "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
 
   "@typescript-eslint/naming-convention": off
+  "unused-imports/no-unused-imports": "error"
