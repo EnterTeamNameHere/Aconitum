@@ -1,21 +1,23 @@
 import type {Snowflake} from "discord-api-types/globals.js";
 import {ObjectId} from "mongodb";
 
-export type CollectionName = "clusters" | "connections";
+export type CollectionName = "clusters" | "connections" | "connectionCaches";
 
 export interface Cluster {
-    _id?: ObjectId;
+    _id: ObjectId;
     guildId: Snowflake;
     name: string;
+    active: boolean;
 }
 
-export type Platform = "discord" | "teams" | "line" | "slack";
+export type Platform = "uncategorized" | "discord" | "teams" | "line" | "slack";
 
 export interface Connection {
-    _id?: ObjectId;
+    _id: ObjectId;
     clusterId: ObjectId;
     name: string;
     platform: Platform;
+    active: boolean;
 }
 
 export interface DiscordConnection extends Connection {

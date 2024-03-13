@@ -27,6 +27,7 @@ const commands: Commands = [
                     _id: clusterId,
                     guildId,
                     name: clusterName,
+                    active: true,
                 };
                 await clusterData.register(cluster);
 
