@@ -32,7 +32,7 @@ const commands: Commands = [
                 if (channel === null) {
                     throw new Error("channel is null");
                 }
-                const connectionBase = await connectionData.createConnectionData(interaction, "discord");
+                const connectionBase = await connectionData.createConnectionData(interaction);
                 if (connectionBase === null) {
                     return;
                 }
@@ -60,7 +60,7 @@ const commands: Commands = [
                     content: `${interaction.options.getString("connection-name")}をクラスター${cluster.name}に登録しました。`,
                 });
             } catch (e) {
-                await interaction.editReply({content: "実行中にエラーが発生しました．"});
+                await interaction.editReply({content: "実行中にエラーが発生しました。"});
                 console.error(`[ERR]: ${e}`);
             }
         },
