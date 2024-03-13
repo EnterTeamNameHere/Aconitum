@@ -3,11 +3,10 @@ import {
     ActionRowBuilder,
     ChatInputCommandInteraction,
     CommandInteraction,
-    
     ModalBuilder,
     SlashCommandBuilder,
     TextInputBuilder,
-    TextInputStyle
+    TextInputStyle,
 } from "discord.js";
 import type {ModalActionRowComponentBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
@@ -19,7 +18,7 @@ import connectionData from "../utils/connectionData.js";
 import {deleteMany, insertOne, update} from "../utils/db.js";
 import {autoDeleteMessage} from "../utils/tools.js";
 
-type ModalData = TeamsConnection & {authNumber: string};
+type ModalData = TeamsConnection & {authNumber: string; timestamp: Date};
 
 const commands: Commands = [
     {
@@ -46,6 +45,7 @@ const commands: Commands = [
                         sendWebhook: "",
                     },
                     authNumber,
+                    timestamp: new Date(),
                 };
                 await insertOne<ModalData>("connectionCaches", tmpModalData);
 

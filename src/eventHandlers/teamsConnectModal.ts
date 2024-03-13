@@ -1,14 +1,14 @@
 import {Events} from "discord.js";
 import {ObjectId} from "mongodb";
 
-import { TeamsConnection} from "../interfaces/dbInterfaces.js";
+import {TeamsConnection} from "../interfaces/dbInterfaces.js";
 import type {Connection} from "../interfaces/dbInterfaces.js";
 import type Procs from "../interfaces/eventHandler.js";
 import clusterData from "../utils/clusterData.js";
 import connectionData from "../utils/connectionData.js";
 import {deleteMany, findOne} from "../utils/db.js";
 
-type ModalData = Connection & {authNumber: string};
+type ModalData = Connection & {authNumber: string; timestamp: Date};
 
 const procs: Procs = function execute(client): void {
     client.on<Events.InteractionCreate>(Events.InteractionCreate, async interaction => {
