@@ -20,7 +20,7 @@ const APIServer = express();
 
 const commandList = new Map<string, Command>();
 const commandsPath = join(__dirname, "commands");
-const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js") || file.endsWith(".ts"));
 client.once<Events.ClientReady>(Events.ClientReady, async () => {
     for (const file of commandsFiles) {
         const filePath = `file://${join(commandsPath, file)}`;
@@ -55,7 +55,7 @@ APIServer.post(
 
 (async () => {
     const handlersPath = join(__dirname, "eventHandlers");
-    const handlersFiles = readdirSync(handlersPath).filter(file => file.endsWith(".js"));
+    const handlersFiles = readdirSync(handlersPath).filter(file => file.endsWith(".js") || file.endsWith(".ts"));
     for (const file of handlersFiles) {
         const filePath = `file://${join(handlersPath, file)}`;
         await import(filePath).then(handlers => {
