@@ -1,8 +1,8 @@
 import type {ChatInputCommandInteraction} from "discord.js";
 import {Events, Interaction} from "discord.js";
 
+import commandList from "../index.js";
 import Procs from "../interfaces/eventHandler.js";
-import commandList from "../main.js";
 
 const procs: Procs = function execute(client): void {
     async function commandProcess(interaction: ChatInputCommandInteraction) {
