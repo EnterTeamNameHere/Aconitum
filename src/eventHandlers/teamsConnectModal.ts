@@ -4,7 +4,7 @@ import {ObjectId} from "mongodb";
 import {TeamsConnection} from "../interfaces/dbInterfaces.js";
 import type {Connection} from "../interfaces/dbInterfaces.js";
 import type Procs from "../interfaces/eventHandler.js";
-import clusterData from "../utils/clusterData.js";
+import {Cluster} from "../utils/cluster.js";
 import connectionData from "../utils/connectionData.js";
 import {deleteMany, findOne} from "../utils/db.js";
 
@@ -51,9 +51,10 @@ const procs: Procs = function execute(client): void {
                     const connection = Object.assign(modalData);
                     connection._id = new ObjectId();
                     delete connection.authNumber;
+                    delete connection.timestamp;
                     await connectionData.register<TeamsConnection>(connection);
 
-                    const cluster = await clusterData.findOne({_id: connection.clusterId});
+                    const cluster = await Cluster.findOne({_id: connection.clusterId});
                     if (cluster === null) {
                         throw new Error("cluster not found");
                     }

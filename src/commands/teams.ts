@@ -13,7 +13,7 @@ import {ObjectId} from "mongodb";
 
 import {Commands} from "../interfaces/command";
 import {TeamsConnection} from "../interfaces/dbInterfaces.js";
-import clusterData from "../utils/clusterData.js";
+import {Cluster} from "../utils/cluster.js";
 import connectionData from "../utils/connectionData.js";
 import {deleteMany, insertOne, update} from "../utils/db.js";
 import {autoDeleteMessage} from "../utils/tools.js";
@@ -72,7 +72,7 @@ const commands: Commands = [
                     },
                 };
 
-                const cluster = await clusterData.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
+                const cluster = await Cluster.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
                 if (cluster === null) {
                     throw new Error("cluster not found");
                 }
@@ -87,8 +87,7 @@ const commands: Commands = [
                     text: `Aconitumがこのチャンネルをクラスター"${cluster.name}"に追加しようとしています。\n以下の番号をDiscordに入力してください: ${authNumber}`,
                 };
                 try {
-                    const ax = await axios.post(teamsWebhook, message);
-                    console.log(ax);
+                    await axios.post(teamsWebhook, message);
                     await new Promise(resolve => {
                         setTimeout(resolve, 60000);
                     });

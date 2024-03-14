@@ -3,7 +3,7 @@ import {ObjectId} from "mongodb";
 
 import type {Commands} from "../interfaces/command.js";
 import type {DiscordConnection} from "../interfaces/dbInterfaces.js";
-import clusterData from "../utils/clusterData.js";
+import {Cluster} from "../utils/cluster.js";
 import connectionData from "../utils/connectionData.js";
 
 const commands: Commands = [
@@ -52,7 +52,7 @@ const commands: Commands = [
                 };
 
                 await connectionData.register<DiscordConnection>(connection);
-                const cluster = await clusterData.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
+                const cluster = await Cluster.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
                 if (cluster === null) {
                     throw new Error("cluster not found");
                 }

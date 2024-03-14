@@ -3,13 +3,6 @@ import {ObjectId} from "mongodb";
 
 export type CollectionName = "clusters" | "connections" | "connectionCaches";
 
-export interface Cluster {
-    _id: ObjectId;
-    guildId: Snowflake;
-    name: string;
-    active: boolean;
-}
-
 export type Platform = "uncategorized" | "discord" | "teams" | "line" | "slack";
 
 export interface Connection {

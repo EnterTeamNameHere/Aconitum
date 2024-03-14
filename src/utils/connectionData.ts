@@ -3,7 +3,7 @@ import {Filter, ObjectId} from "mongodb";
 
 import type {Connection} from "../interfaces/dbInterfaces.js";
 
-import clusterData from "./clusterData.js";
+import {Cluster} from "./cluster.js";
 import {checkStringId, deleteMany, find as findDoc, findOne as findOneDoc, updateOrInsert} from "./db.js";
 
 const find = async function f<PlatformConnection extends Connection = Connection>(
@@ -42,7 +42,7 @@ const createConnectionData = async function f(interaction: ChatInputCommandInter
         if (guildId === null) {
             throw new Error("Interaction's guildId is null");
         }
-        if (!(await clusterData.checkGuildId(clusterId, guildId))) {
+        if (!(await Cluster.checkGuildId(clusterId, guildId))) {
             return "指定されたクラスターが見つかりませんでした。";
         }
 

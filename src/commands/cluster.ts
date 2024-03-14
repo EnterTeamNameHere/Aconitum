@@ -3,8 +3,7 @@ import {SlashCommandBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
 
 import {Commands} from "../interfaces/command";
-import type {Cluster} from "../interfaces/dbInterfaces.js";
-import clusterData from "../utils/clusterData.js";
+import {Cluster} from "../utils/cluster.js";
 
 const commands: Commands = [
     {
@@ -23,14 +22,13 @@ const commands: Commands = [
                 if (guildId === null) {
                     throw new Error("Interaction's guildId is null");
                 }
-                const cluster: Cluster = {
+                const cluster = new Cluster({
                     _id: clusterId,
                     guildId,
                     name: clusterName,
                     active: true,
-                };
-                await clusterData.register(cluster);
-
+                });
+                await cluster.register();
                 await interaction.editReply(`クラスター ${clusterName} を作成しました\nID: ${clusterId.toString()}`);
             } catch (e) {
                 await interaction.editReply("実行中にエラーが発生しました");
