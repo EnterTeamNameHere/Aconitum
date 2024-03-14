@@ -12,7 +12,11 @@
     "start-dev": "cross-env NODE_ENV=development node .",
     "start-prod": "cross-env NODE_ENV=production node .",
     "cmd-dev": "cross-env NODE_ENV=development node build/deployCommands.js",
-    "cmd-prod": "cross-env NODE_ENV=production node build/deployCommands.js"
+    "cmd-prod": "cross-env NODE_ENV=production node build/deployCommands.js",
+    "tsx": "npm run type && cross-env NODE_ENV=development node --import=tsx ./src/index.ts",
+    "tsx-watch": "npm run type && cross-env NODE_ENV=development tsx watch ./src/index.ts",
+    "tsx-cmd": "npm run type && cross-env NODE_ENV=development node --import=tsx ./src/deployCommands.ts",
+    "type": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -32,14 +36,12 @@
     "cross-env": "^7.0.3",
     "discord-api-types": "^0.37.71",
     "discord.js": "^14.12.1",
-    "enquirer": "^2.4.1",
     "express": "^4.18.3",
-    "inquirer": "^9.2.15",
     "mongodb": "^6.4.0",
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
-    "@types/inquirer": "^9.0.7",
     "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
@@ -52,6 +54,7 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
+    "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   },
   "volta": {
