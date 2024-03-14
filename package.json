@@ -13,9 +13,10 @@
     "start-prod": "cross-env NODE_ENV=production node .",
     "cmd-dev": "cross-env NODE_ENV=development node build/deployCommands.js",
     "cmd-prod": "cross-env NODE_ENV=production node build/deployCommands.js",
-    "tsx": "cross-env NODE_ENV=development node --import=tsx ./src/index.ts",
-    "tsx-watch": "cross-env NODE_ENV=development tsx watch ./src/index.ts",
-    "tsx-cmd": "cross-env NODE_ENV=development node --import=tsx ./src/deployCommands.ts"
+    "tsx": "npm run type && cross-env NODE_ENV=development node --import=tsx ./src/index.ts",
+    "tsx-watch": "npm run type && cross-env NODE_ENV=development tsx watch ./src/index.ts",
+    "tsx-cmd": "npm run type && cross-env NODE_ENV=development node --import=tsx ./src/deployCommands.ts",
+    "type": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
