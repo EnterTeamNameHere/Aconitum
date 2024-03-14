@@ -30,7 +30,7 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
             }
         });
     }
-
+    throw new Error("Not implemented yet");
     console.log("Ready");
 });
 export default commandList;
