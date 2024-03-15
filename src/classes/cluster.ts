@@ -1,5 +1,4 @@
 import type {Snowflake} from "discord-api-types/globals.js";
-import {SnowflakeUtil} from "discord.js";
 import type {Filter} from "mongodb";
 import {ObjectId} from "mongodb";
 
@@ -13,16 +12,12 @@ export type ClusterBase = {
 };
 
 export class Cluster implements ClusterBase {
-    _id: ObjectId;
-    guildId: Snowflake;
-    name: string;
-    active: boolean;
+    _id: ObjectId = new ObjectId("");
+    guildId: Snowflake = "";
+    name: string = "";
+    active: boolean = false;
 
     constructor(cluster?: Partial<ClusterBase>) {
-        this._id = new ObjectId("");
-        this.guildId = SnowflakeUtil.generate().toString();
-        this.name = "";
-        this.active = false;
         if (cluster) {
             Object.assign(this, cluster);
         }
@@ -84,8 +79,12 @@ export class Cluster implements ClusterBase {
         return isIncludes<ClusterBase>("clusters", this.getBase());
     }
 
-    async register(): Promise<void> {
-        await insertOne<ClusterBase>("clusters", this.getBase());
+    async register(): Promise<boolean> {
+        if (await this.isIncludes()) {
+            await insertOne<ClusterBase>("clusters", this.getBase());
+            return true;
+        }
+        return false;
     }
 
     async remove(): Promise<void> {

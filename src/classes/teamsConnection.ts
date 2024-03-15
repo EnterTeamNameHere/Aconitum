@@ -1,6 +1,6 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -13,17 +13,15 @@ type TeamsConnectionBase = ConnectionBase & {
 };
 
 class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsConnectionBase {
-    platform: "teams";
+    platform = "teams" as const;
     data: {
         sendWebhook: string;
+    } = {
+        sendWebhook: "",
     };
 
     constructor(connection?: Partial<TeamsConnectionBase>) {
         super(connection);
-        this.platform = "teams";
-        this.data = {
-            sendWebhook: "",
-        };
         if (connection) {
             Object.assign(this.data, connection.data);
         }
@@ -73,15 +71,12 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         return isIncludes<TeamsConnectionBase>("connections", this.getBase());
     }
 
-    async register(): Promise<void> {
-        return updateOrInsert<TeamsConnectionBase>(
-            "connections",
-            {
-                platform: this.platform,
-                name: this.name,
-            },
-            this.getBase(),
-        );
+    async register(): Promise<boolean> {
+        if (await this.isIncludes()) {
+            await insertOne<TeamsConnectionBase>("connections", this.getBase());
+            return true;
+        }
+        return false;
     }
 
     async remove(): Promise<void> {

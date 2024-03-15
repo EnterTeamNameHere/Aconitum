@@ -1,6 +1,6 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -14,19 +14,17 @@ type SlackConnectionBase = ConnectionBase & {
 };
 
 class SlackConnection extends Connection<SlackConnectionBase> implements SlackConnectionBase {
-    platform: "slack";
+    platform = "slack" as const;
     data: {
         send: string;
         recv: string;
+    } = {
+        send: "",
+        recv: "",
     };
 
     constructor(connection?: Partial<SlackConnectionBase>) {
         super(connection);
-        this.platform = "slack";
-        this.data = {
-            send: "",
-            recv: "",
-        };
         if (connection) {
             Object.assign(this.data, connection.data);
         }
@@ -76,15 +74,12 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         return isIncludes<SlackConnectionBase>("connections", this.getBase());
     }
 
-    async register(): Promise<void> {
-        return updateOrInsert<SlackConnectionBase>(
-            "connections",
-            {
-                platform: this.platform,
-                name: this.name,
-            },
-            this.getBase(),
-        );
+    async register(): Promise<boolean> {
+        if (await this.isIncludes()) {
+            await insertOne<SlackConnectionBase>("connections", this.getBase());
+            return true;
+        }
+        return false;
     }
 
     async remove(): Promise<void> {
