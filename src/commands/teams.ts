@@ -11,14 +11,15 @@ import {
 import type {ModalActionRowComponentBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
 
-import {Commands} from "../interfaces/command";
-import {TeamsConnection} from "../interfaces/dbInterfaces.js";
-import clusterData from "../utils/clusterData.js";
-import connectionData from "../utils/connectionData.js";
+import {Cluster} from "../classes/cluster.js";
+import {Connection} from "../classes/connection.js";
+import {TeamsConnection } from "../classes/teamsConnection.js";
+import type {TeamsConnectionBase} from "../classes/teamsConnection.js";
+import {Commands} from "../interfaces/command.js";
 import {deleteMany, insertOne, update} from "../utils/db.js";
 import {autoDeleteMessage} from "../utils/tools.js";
 
-type ModalData = TeamsConnection & {authNumber: string; timestamp: Date};
+type ModalData = TeamsConnectionBase & {authNumber: string; timestamp: Date};
 
 const commands: Commands = [
     {
@@ -59,20 +60,20 @@ const commands: Commands = [
                 await interaction.showModal(modal);
 
                 const teamsWebhook = interaction.options.getString("teams-webhook", true);
-                const connectionBase = await connectionData.createConnectionData(interaction);
+                const connectionBase = await Connection.createConnectionData(interaction);
                 if (connectionBase === null) {
                     return;
                 }
-                const connection: TeamsConnection = {
+                const connection: TeamsConnection = new TeamsConnection({
                     ...connectionBase,
                     _id: tmpModalData._id,
                     platform: "teams",
                     data: {
                         sendWebhook: teamsWebhook,
                     },
-                };
+                });
 
-                const cluster = await clusterData.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
+                const cluster = await Cluster.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
                 if (cluster === null) {
                     throw new Error("cluster not found");
                 }
@@ -87,8 +88,7 @@ const commands: Commands = [
                     text: `Aconitumがこのチャンネルをクラスター"${cluster.name}"に追加しようとしています。\n以下の番号をDiscordに入力してください: ${authNumber}`,
                 };
                 try {
-                    const ax = await axios.post(teamsWebhook, message);
-                    console.log(ax);
+                    await axios.post(teamsWebhook, message);
                     await new Promise(resolve => {
                         setTimeout(resolve, 60000);
                     });

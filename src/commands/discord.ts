@@ -1,10 +1,10 @@
 import {ChannelType, SlashCommandBuilder, TextChannel} from "discord.js";
 import {ObjectId} from "mongodb";
 
+import {Cluster} from "../classes/cluster.js";
+import {Connection} from "../classes/connection.js";
+import {DiscordConnection} from "../classes/discordConnection.js";
 import type {Commands} from "../interfaces/command.js";
-import type {DiscordConnection} from "../interfaces/dbInterfaces.js";
-import clusterData from "../utils/clusterData.js";
-import connectionData from "../utils/connectionData.js";
 
 const commands: Commands = [
     {
@@ -32,7 +32,7 @@ const commands: Commands = [
                 if (channel === null) {
                     throw new Error("channel is null");
                 }
-                const connectionBase = await connectionData.createConnectionData(interaction);
+                const connectionBase = await Connection.createConnectionData(interaction);
                 if (connectionBase === null) {
                     return;
                 }
@@ -42,17 +42,17 @@ const commands: Commands = [
                         reason: "Created by Aconitum",
                     })
                 ).url;
-                const connection: DiscordConnection = {
+                const connection: DiscordConnection = new DiscordConnection({
                     ...connectionBase,
                     platform: "discord",
                     data: {
                         channelId: channel.id,
                         channelWebhook: webhook,
                     },
-                };
+                });
 
-                await connectionData.register<DiscordConnection>(connection);
-                const cluster = await clusterData.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
+                await connection.register();
+                const cluster = await Cluster.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
                 if (cluster === null) {
                     throw new Error("cluster not found");
                 }
@@ -64,7 +64,7 @@ const commands: Commands = [
                 console.error(`[ERR]: ${e}`);
             }
         },
-        global: false,
+        global: true,
     },
 ];
 
