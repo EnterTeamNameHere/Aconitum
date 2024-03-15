@@ -40,12 +40,24 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         return connections;
     }
 
+    static async findActive(filter: Filter<LineConnectionBase>): Promise<Array<LineConnection>> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return LineConnection.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<LineConnectionBase>): Promise<LineConnection | null> {
         const connectionBase = await findOne<LineConnectionBase>("connections", filter);
         if (connectionBase === null) {
             return null;
         }
         return new LineConnection(connectionBase);
+    }
+
+    static async findActiveOne(filter: Filter<LineConnectionBase>): Promise<LineConnection | null> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return LineConnection.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<LineConnectionBase>): Promise<boolean> {

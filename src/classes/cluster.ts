@@ -32,12 +32,24 @@ export class Cluster implements ClusterBase {
         return clusters;
     }
 
+    static async findActive(filter: Filter<ClusterBase>): Promise<Array<Cluster>> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return Cluster.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<ClusterBase>): Promise<Cluster | null> {
         const clusterBase = await findOne<ClusterBase>("clusters", filter);
         if (clusterBase === null) {
             return null;
         }
         return new Cluster(clusterBase);
+    }
+
+    static async findActiveOne(filter: Filter<ClusterBase>): Promise<Cluster | null> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return Cluster.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<ClusterBase>): Promise<boolean> {
