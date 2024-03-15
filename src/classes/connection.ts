@@ -30,7 +30,7 @@ type ConnectionBase = {
     active: boolean;
 };
 
-type Connections = Connection<ConnectionBase> | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
+type Connections = Connection<ConnectionBases> | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
 type ConnectionBases = ConnectionBase | DiscordConnectionBase | TeamsConnectionBase | LineConnectionBase | SlackConnectionBase;
 
 class Connection<T extends ConnectionBases> {
