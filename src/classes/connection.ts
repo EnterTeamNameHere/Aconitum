@@ -30,7 +30,7 @@ type ConnectionBase = {
     active: boolean;
 };
 
-type Connections = Connection<ConnectionBase> | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
+type Connections = Connection<ConnectionBases> | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
 type ConnectionBases = ConnectionBase | DiscordConnectionBase | TeamsConnectionBase | LineConnectionBase | SlackConnectionBase;
 
 class Connection<T extends ConnectionBases> {
@@ -40,7 +40,7 @@ class Connection<T extends ConnectionBases> {
     platform: Platform;
     active: boolean;
 
-    protected constructor(connection?: Partial<T>) {
+    constructor(connection?: Partial<T>) {
         this._id = new ObjectId("");
         this.clusterId = new ObjectId("");
         this.name = "";
