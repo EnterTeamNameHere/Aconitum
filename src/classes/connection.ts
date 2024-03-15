@@ -40,7 +40,7 @@ class Connection<T extends ConnectionBases> {
     platform: Platform;
     active: boolean;
 
-    protected constructor(connection?: Partial<T>) {
+    constructor(connection?: Partial<T>) {
         this._id = new ObjectId("");
         this.clusterId = new ObjectId("");
         this.name = "";
