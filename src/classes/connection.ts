@@ -4,13 +4,13 @@ import {ObjectId} from "mongodb";
 import {checkStringId} from "../utils/db.js";
 
 import {Cluster} from "./cluster.js";
-import {DiscordConnection } from "./discordConnection.js";
+import {DiscordConnection} from "./discordConnection.js";
 import type {DiscordConnectionBase} from "./discordConnection.js";
-import {LineConnection } from "./lineConnection.js";
+import {LineConnection} from "./lineConnection.js";
 import type {LineConnectionBase} from "./lineConnection.js";
-import {SlackConnection } from "./slackConnection.js";
+import {SlackConnection} from "./slackConnection.js";
 import type {SlackConnectionBase} from "./slackConnection.js";
-import {TeamsConnection } from "./teamsConnection.js";
+import {TeamsConnection} from "./teamsConnection.js";
 import type {TeamsConnectionBase} from "./teamsConnection.js";
 
 // export type OmitFunction<T> = Pick<
@@ -40,7 +40,7 @@ class Connection<T extends ConnectionBases> {
     platform: Platform;
     active: boolean;
 
-    protected constructor(connection: Partial<T>) {
+    protected constructor(connection?: Partial<T>) {
         this._id = new ObjectId("");
         this.clusterId = new ObjectId("");
         this.name = "";
