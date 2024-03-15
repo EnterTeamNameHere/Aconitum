@@ -36,12 +36,24 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         return connections;
     }
 
+    static async findActive(filter: Filter<TeamsConnectionBase>): Promise<Array<TeamsConnection>> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return TeamsConnection.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<TeamsConnectionBase>): Promise<TeamsConnection | null> {
         const connectionBase = await findOne<TeamsConnectionBase>("connections", filter);
         if (connectionBase === null) {
             return null;
         }
         return new TeamsConnection(connectionBase);
+    }
+
+    static async findActiveOne(filter: Filter<TeamsConnectionBase>): Promise<TeamsConnection | null> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return TeamsConnection.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<TeamsConnectionBase>): Promise<boolean> {
