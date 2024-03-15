@@ -84,7 +84,7 @@ export class Cluster implements ClusterBase {
 
     setStringId(id?: string) {
         this._id = new ObjectId(id);
-        return this._id;
+        return this;
     }
 
     async isIncludes(): Promise<boolean> {
@@ -115,25 +115,16 @@ export class Cluster implements ClusterBase {
 
     setGuildId(guildId: Snowflake) {
         this.guildId = guildId;
-    }
-
-    getGuildId() {
-        return this.guildId;
+        return this;
     }
 
     setName(name: string) {
         this.name = name;
-    }
-
-    getName() {
-        return this.name;
+        return this;
     }
 
     setActive(active: boolean) {
         this.active = active;
-    }
-
-    getActive() {
-        return this.active;
+        return this;
     }
 }
