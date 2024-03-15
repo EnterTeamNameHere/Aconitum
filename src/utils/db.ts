@@ -9,7 +9,7 @@ let client = new MongoClient(config.db);
 const db = client.db("Aconitum");
 
 function errorHandler(error: unknown): unknown {
-    console.error(error);
+    console.error(`[err]: ${error}`);
     return error;
 }
 
