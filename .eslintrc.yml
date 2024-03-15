@@ -125,3 +125,4 @@ rules:
 
   "@typescript-eslint/naming-convention": off
   "unused-imports/no-unused-imports": "error"
+  "@typescript-eslint/lines-between-class-members": off

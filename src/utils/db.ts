@@ -1,7 +1,7 @@
 import type {Document, MatchKeysAndValues, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
 import {Filter, MongoClient} from "mongodb";
 
-import type {CollectionName} from "../interfaces/dbInterfaces.js";
+import type {CollectionName} from "../classes/connection.js";
 
 import config from "./envConf.js";
 
