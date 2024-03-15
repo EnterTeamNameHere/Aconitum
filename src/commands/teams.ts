@@ -11,14 +11,15 @@ import {
 import type {ModalActionRowComponentBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
 
-import {Commands} from "../interfaces/command";
-import {TeamsConnection} from "../interfaces/dbInterfaces.js";
-import {Cluster} from "../utils/cluster.js";
-import connectionData from "../utils/connectionData.js";
+import {Cluster} from "../classes/cluster.js";
+import {Connection} from "../classes/connection.js";
+import {TeamsConnection } from "../classes/teamsConnection.js";
+import type {TeamsConnectionBase} from "../classes/teamsConnection.js";
+import {Commands} from "../interfaces/command.js";
 import {deleteMany, insertOne, update} from "../utils/db.js";
 import {autoDeleteMessage} from "../utils/tools.js";
 
-type ModalData = TeamsConnection & {authNumber: string; timestamp: Date};
+type ModalData = TeamsConnectionBase & {authNumber: string; timestamp: Date};
 
 const commands: Commands = [
     {
@@ -59,18 +60,18 @@ const commands: Commands = [
                 await interaction.showModal(modal);
 
                 const teamsWebhook = interaction.options.getString("teams-webhook", true);
-                const connectionBase = await connectionData.createConnectionData(interaction);
+                const connectionBase = await Connection.createConnectionData(interaction);
                 if (connectionBase === null) {
                     return;
                 }
-                const connection: TeamsConnection = {
+                const connection: TeamsConnection = new TeamsConnection({
                     ...connectionBase,
                     _id: tmpModalData._id,
                     platform: "teams",
                     data: {
                         sendWebhook: teamsWebhook,
                     },
-                };
+                });
 
                 const cluster = await Cluster.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
                 if (cluster === null) {

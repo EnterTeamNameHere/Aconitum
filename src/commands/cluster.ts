@@ -2,8 +2,8 @@ import type {ChatInputCommandInteraction} from "discord.js";
 import {SlashCommandBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
 
+import {Cluster} from "../classes/cluster.js";
 import {Commands} from "../interfaces/command";
-import {Cluster} from "../utils/cluster.js";
 
 const commands: Commands = [
     {

@@ -1,16 +1,16 @@
 import type {Snowflake} from "discord-api-types/globals.js";
 import {SnowflakeUtil} from "discord.js";
-import { ObjectId} from "mongodb";
 import type {Filter} from "mongodb";
+import {ObjectId} from "mongodb";
 
-import { deleteMany, find, findOne, insertOne, isIncludes } from "./db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
-export interface ClusterBase {
+export type ClusterBase = {
     _id: ObjectId;
     guildId: Snowflake;
     name: string;
     active: boolean;
-}
+};
 
 export class Cluster implements ClusterBase {
     _id: ObjectId;
@@ -19,7 +19,7 @@ export class Cluster implements ClusterBase {
     active: boolean;
 
     constructor(cluster: Partial<ClusterBase>) {
-        this._id = new ObjectId();
+        this._id = new ObjectId("");
         this.guildId = SnowflakeUtil.generate().toString();
         this.name = "";
         this.active = false;
@@ -75,7 +75,7 @@ export class Cluster implements ClusterBase {
         };
     }
 
-    public setStringId(id?: string) {
+    setStringId(id?: string) {
         this._id = new ObjectId(id);
         return this._id;
     }
@@ -109,5 +109,29 @@ export class Cluster implements ClusterBase {
             return false;
         }
         return false;
+    }
+
+    setGuildId(guildId: Snowflake) {
+        this.guildId = guildId;
+    }
+
+    getGuildId() {
+        return this.guildId;
+    }
+
+    setName(name: string) {
+        this.name = name;
+    }
+
+    getName() {
+        return this.name;
+    }
+
+    setActive(active: boolean) {
+        this.active = active;
+    }
+
+    getActive() {
+        return this.active;
     }
 }

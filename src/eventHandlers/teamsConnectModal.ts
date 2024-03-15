@@ -1,14 +1,13 @@
 import {Events} from "discord.js";
 import {ObjectId} from "mongodb";
 
-import {TeamsConnection} from "../interfaces/dbInterfaces.js";
-import type {Connection} from "../interfaces/dbInterfaces.js";
+import {Cluster} from "../classes/cluster.js";
+import type { ConnectionBase} from "../classes/connection.js";
+import {TeamsConnection} from "../classes/teamsConnection.js";
 import type Procs from "../interfaces/eventHandler.js";
-import {Cluster} from "../utils/cluster.js";
-import connectionData from "../utils/connectionData.js";
 import {deleteMany, findOne} from "../utils/db.js";
 
-type ModalData = Connection & {authNumber: string; timestamp: Date};
+type ModalData = ConnectionBase & {authNumber: string; timestamp: Date};
 
 const procs: Procs = function execute(client): void {
     client.on<Events.InteractionCreate>(Events.InteractionCreate, async interaction => {
@@ -52,7 +51,7 @@ const procs: Procs = function execute(client): void {
                     connection._id = new ObjectId();
                     delete connection.authNumber;
                     delete connection.timestamp;
-                    await connectionData.register<TeamsConnection>(connection);
+                    await new TeamsConnection(connection).register();
 
                     const cluster = await Cluster.findOne({_id: connection.clusterId});
                     if (cluster === null) {
