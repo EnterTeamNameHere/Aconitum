@@ -115,20 +115,14 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         };
     }
 
-    setSend(value: string): void {
+    setSend(value: string) {
         this.data.send = value;
+        return this;
     }
 
-    getSend(): string {
-        return this.data.send;
-    }
-
-    setRecv(value: string): void {
+    setRecv(value: string) {
         this.data.recv = value;
-    }
-
-    getRecv(): string {
-        return this.data.recv;
+        return this;
     }
 }
 

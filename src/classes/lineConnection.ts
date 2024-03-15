@@ -116,20 +116,9 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         };
     }
 
-    setId(value: ObjectId): void {
-        this._id = value;
-    }
-
-    getId(): ObjectId {
-        return this._id;
-    }
-
-    setToken(value: string): void {
+    setToken(value: string) {
         this.data.token = value;
-    }
-
-    getToken(): string {
-        return this.data.token;
+        return this;
     }
 }
 

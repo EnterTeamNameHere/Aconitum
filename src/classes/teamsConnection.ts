@@ -112,12 +112,9 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         };
     }
 
-    setSendWebhook(sendWebhook: string): void {
+    setSendWebhook(sendWebhook: string) {
         this.data.sendWebhook = sendWebhook;
-    }
-
-    getSendWebhook(): string {
-        return this.data.sendWebhook;
+        return this;
     }
 }
 

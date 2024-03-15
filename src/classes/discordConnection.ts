@@ -130,20 +130,14 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         };
     }
 
-    setChannelId(channelId: Snowflake): void {
+    setChannelId(channelId: Snowflake) {
         this.data.channelId = channelId;
+        return this;
     }
 
-    getChannelId(): Snowflake {
-        return this.data.channelId;
-    }
-
-    setChannelWebhook(channelWebhook: Snowflake): void {
+    setChannelWebhook(channelWebhook: Snowflake) {
         this.data.channelWebhook = channelWebhook;
-    }
-
-    getChannelWebhook(): Snowflake {
-        return this.data.channelWebhook;
+        return this;
     }
 }
 
