@@ -12,7 +12,7 @@ type TeamsConnectionBase = ConnectionBase & {
     };
 };
 
-class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsConnectionBase {
+class TeamsConnection extends Connection implements TeamsConnectionBase {
     platform = "teams" as const;
     data: {
         sendWebhook: string;
@@ -68,15 +68,9 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         await deleteMany<TeamsConnectionBase>("connections", {clusterId});
     }
 
-    getBase(): TeamsConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): TeamsConnection {
+        const connectionBase = connection.getBase();
+        return new TeamsConnection({...connectionBase, platform: "teams"});
     }
 
     async isIncludes(): Promise<boolean> {
@@ -93,6 +87,23 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
 
     async remove(): Promise<void> {
         return deleteMany<TeamsConnectionBase>("connections", this.getBase());
+    }
+
+    fromConnection(connection: Connection): TeamsConnection {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    getBase(): TeamsConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     setConnectionBase(connectionBase: ConnectionBase): void {

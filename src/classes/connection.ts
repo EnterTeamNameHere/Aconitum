@@ -1,5 +1,5 @@
 import type {ChatInputCommandInteraction} from "discord.js";
-import {ObjectId} from "mongodb";
+import { ObjectId} from "mongodb";
 
 import {checkStringId} from "../utils/db.js";
 
@@ -30,17 +30,17 @@ type ConnectionBase = {
     active: boolean;
 };
 
-type Connections = Connection<ConnectionBases> | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
+type Connections = Connection | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
 type ConnectionBases = ConnectionBase | DiscordConnectionBase | TeamsConnectionBase | LineConnectionBase | SlackConnectionBase;
 
-class Connection<T extends ConnectionBases> {
+class Connection {
     _id: ObjectId = new ObjectId("");
     clusterId: ObjectId = new ObjectId("");
     name: string = "";
     platform: Platform = "uncategorized";
     active: boolean = false;
 
-    constructor(connection?: Partial<T>) {
+    constructor(connection?: Partial<ConnectionBases>) {
         if (connection) {
             Object.assign(this, connection);
         }
@@ -87,6 +87,15 @@ class Connection<T extends ConnectionBases> {
         }
         return result;
     }
+
+    // static async find<T extends ConnectionBases>(filter: Filter<U>): Promise<Array<T>> {
+    //     const connectionBases = await find<U>("connections", filter);
+    //     const connections = new Array<Connection<T>>();
+    //     for (const connectionBase of connectionBases) {
+    //         connections.push(new Connection<T>(connectionBase));
+    //     }
+    //     return connections;
+    // }
 
     getBase(): ConnectionBase {
         return {

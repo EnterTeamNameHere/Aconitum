@@ -1,12 +1,12 @@
 import type {Snowflake} from "discord-api-types/globals.js";
 import type {Client} from "discord.js";
-import {ObjectId} from "mongodb";
 import type {Filter} from "mongodb";
+import {ObjectId} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
-import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
+import {Connection} from "./connection.js";
 
 type DiscordConnectionBase = ConnectionBase & {
     platform: "discord";
@@ -16,7 +16,7 @@ type DiscordConnectionBase = ConnectionBase & {
     };
 };
 
-class DiscordConnection extends Connection<DiscordConnectionBase> implements DiscordConnectionBase {
+class DiscordConnection extends Connection implements DiscordConnectionBase {
     platform = "discord" as const;
     data: {
         channelId: Snowflake;
@@ -82,15 +82,9 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         }
     }
 
-    getBase(): DiscordConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): DiscordConnection {
+        const connectionBase = connection.getBase();
+        return new DiscordConnection({...connectionBase, platform: "discord"});
     }
 
     async isIncludes(): Promise<boolean> {
@@ -111,6 +105,23 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
 
     async channelAccessible(client: Client): Promise<boolean> {
         return DiscordConnection.channelAccessible(client, this.data.channelId);
+    }
+
+    fromConnection(connection: Connection): DiscordConnection {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    getBase(): DiscordConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     setConnectionBase(connectionBase: ConnectionBase): void {

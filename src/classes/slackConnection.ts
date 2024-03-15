@@ -13,7 +13,7 @@ type SlackConnectionBase = ConnectionBase & {
     };
 };
 
-class SlackConnection extends Connection<SlackConnectionBase> implements SlackConnectionBase {
+class SlackConnection extends Connection implements SlackConnectionBase {
     platform = "slack" as const;
     data: {
         send: string;
@@ -71,15 +71,9 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         await deleteMany<SlackConnectionBase>("connections", {clusterId});
     }
 
-    getBase(): SlackConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): SlackConnectionBase {
+        const connectionBase = connection.getBase();
+        return new SlackConnection({...connectionBase, platform: "slack"});
     }
 
     async isIncludes(): Promise<boolean> {
@@ -96,6 +90,23 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
 
     async remove(): Promise<void> {
         return deleteMany<SlackConnectionBase>("connections", this.getBase());
+    }
+
+    fromConnectionBase(connection: Connection): SlackConnectionBase {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    getBase(): SlackConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     setConnectionBase(connectionBase: ConnectionBase): void {

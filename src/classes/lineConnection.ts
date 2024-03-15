@@ -14,7 +14,7 @@ type LineConnectionBase = ConnectionBase & {
     };
 };
 
-class LineConnection extends Connection<LineConnectionBase> implements LineConnectionBase {
+class LineConnection extends Connection implements LineConnectionBase {
     platform = "line" as const;
     data: {
         id: string;
@@ -72,15 +72,9 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         await deleteMany<LineConnectionBase>("connections", {clusterId});
     }
 
-    getBase(): LineConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): LineConnectionBase {
+        const connectionBase = connection.getBase();
+        return new LineConnection({...connectionBase, platform: "line"});
     }
 
     async isIncludes(): Promise<boolean> {
@@ -97,6 +91,23 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
 
     async remove(): Promise<void> {
         return deleteMany<LineConnectionBase>("connections", this.getBase());
+    }
+
+    fromConnection(connection: Connection): LineConnection {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    getBase(): LineConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     setConnectionBase(connectionBase: ConnectionBase): void {
