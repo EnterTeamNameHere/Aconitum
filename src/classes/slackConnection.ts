@@ -39,12 +39,24 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         return connections;
     }
 
+    static async findActive(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return SlackConnection.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<SlackConnectionBase>): Promise<SlackConnection | null> {
         const connectionBase = await findOne<SlackConnectionBase>("connections", filter);
         if (connectionBase === null) {
             return null;
         }
         return new SlackConnection(connectionBase);
+    }
+
+    static async findActiveOne(filter: Filter<SlackConnectionBase>): Promise<SlackConnection | null> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return SlackConnection.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<SlackConnectionBase>): Promise<boolean> {

@@ -42,12 +42,24 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         return connections;
     }
 
+    static async findActive(filter: Filter<DiscordConnectionBase>): Promise<Array<DiscordConnection>> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return DiscordConnection.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<DiscordConnectionBase>): Promise<DiscordConnection | null> {
         const connectionBase = await findOne<DiscordConnectionBase>("connections", filter);
         if (connectionBase === null) {
             return null;
         }
         return new DiscordConnection(connectionBase);
+    }
+
+    static async findActiveOne(filter: Filter<DiscordConnectionBase>): Promise<DiscordConnection | null> {
+        const activeFilter = filter;
+        activeFilter.active = true;
+        return DiscordConnection.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<DiscordConnectionBase>): Promise<boolean> {
