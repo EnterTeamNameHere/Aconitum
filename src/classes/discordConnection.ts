@@ -33,6 +33,7 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         }
     }
 
+    // static methods
     static async find(filter: Filter<DiscordConnectionBase>): Promise<Array<DiscordConnection>> {
         const connectionBases = await find<DiscordConnectionBase>("connections", filter);
         const connections = new Array<DiscordConnection>();
@@ -43,8 +44,7 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
     }
 
     static async findActive(filter: Filter<DiscordConnectionBase>): Promise<Array<DiscordConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return DiscordConnection.find(activeFilter);
     }
 
@@ -57,8 +57,7 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
     }
 
     static async findActiveOne(filter: Filter<DiscordConnectionBase>): Promise<DiscordConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return DiscordConnection.findOne(activeFilter);
     }
 
@@ -74,6 +73,7 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         await deleteMany<DiscordConnectionBase>("connections", {clusterId});
     }
 
+    // static Discord only methods
     static async channelAccessible(client: Client, channelId: Snowflake): Promise<boolean> {
         try {
             return (await client.channels.fetch(channelId)) !== null;
@@ -82,17 +82,13 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         }
     }
 
-    static fromConnection(connection: Connection): DiscordConnection {
-        const connectionBase = connection.getBase();
-        return new DiscordConnection({...connectionBase, platform: "discord"});
-    }
-
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<DiscordConnectionBase>("connections", this.getBase());
+        return DiscordConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await DiscordConnection.isIncludes({_id: this._id}))) {
             await insertOne<DiscordConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -107,12 +103,22 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         return DiscordConnection.channelAccessible(client, this.data.channelId);
     }
 
+    // creater
     fromConnection(connection: Connection): DiscordConnection {
         const connectionBase = connection.getBase();
         Object.assign(this, connectionBase);
         return this;
     }
 
+    fromConnectionBase(connectionBase: ConnectionBase) {
+        this._id = connectionBase._id;
+        this.clusterId = connectionBase.clusterId;
+        this.name = connectionBase.name;
+        this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
     getBase(): DiscordConnectionBase {
         return {
             _id: this._id,
@@ -122,13 +128,6 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
             active: this.active,
             data: this.data,
         };
-    }
-
-    setConnectionBase(connectionBase: ConnectionBase): void {
-        this._id = connectionBase._id;
-        this.clusterId = connectionBase.clusterId;
-        this.name = connectionBase.name;
-        this.active = connectionBase.active;
     }
 
     getConnectionBase(): ConnectionBase {

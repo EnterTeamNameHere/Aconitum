@@ -1,4 +1,4 @@
-import type {Document, MatchKeysAndValues, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
+import type {Document, OptionalUnlessRequiredId, UpdateFilter} from "mongodb";
 import {Filter, MongoClient} from "mongodb";
 
 import type {CollectionName} from "../classes/connection.js";
@@ -76,35 +76,6 @@ const insertOne = async function f<DocumentType extends Document>(
     }
 };
 
-const insertMany = async function f<DocumentType extends Document>(
-    collectionName: CollectionName,
-    document: Array<OptionalUnlessRequiredId<DocumentType>>,
-): Promise<void> {
-    try {
-        const collection = db.collection<DocumentType>(collectionName);
-        await collection.insertMany(document);
-        console.log("Documents insert is successful");
-    } catch (e) {
-        throw errorHandler(e);
-    }
-};
-
-const updateOrInsert = async function f<DocumentType extends Document>(
-    collectionName: CollectionName,
-    filter: Filter<DocumentType>,
-    document: OptionalUnlessRequiredId<DocumentType>,
-) {
-    try {
-        if (await isIncludes(collectionName, filter)) {
-            await update(collectionName, filter, {$set: document as MatchKeysAndValues<DocumentType>});
-        } else {
-            await insertOne(collectionName, document);
-        }
-    } catch (e) {
-        throw errorHandler(e);
-    }
-};
-
 const deleteMany = async function f<DocumentType extends Document>(
     collectionName: CollectionName,
     filter: Filter<DocumentType>,
@@ -135,4 +106,4 @@ const checkStringId = async function f(id: string) {
     return false;
 };
 
-export {find, findOne, isIncludes, update, insertOne, insertMany, updateOrInsert, deleteMany, open, close, checkStringId};
+export {find, findOne, isIncludes, update, insertOne, deleteMany, open, close, checkStringId};

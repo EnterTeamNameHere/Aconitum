@@ -27,6 +27,7 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
         }
     }
 
+    // static methods
     static async find(filter: Filter<TeamsConnectionBase>): Promise<Array<TeamsConnection>> {
         const connectionBases = await find<TeamsConnectionBase>("connections", filter);
         const connections = new Array<TeamsConnection>();
@@ -37,8 +38,7 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
     }
 
     static async findActive(filter: Filter<TeamsConnectionBase>): Promise<Array<TeamsConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return TeamsConnection.find(activeFilter);
     }
 
@@ -51,8 +51,7 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
     }
 
     static async findActiveOne(filter: Filter<TeamsConnectionBase>): Promise<TeamsConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return TeamsConnection.findOne(activeFilter);
     }
 
@@ -73,12 +72,13 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
         return new TeamsConnection({...connectionBase, platform: "teams"});
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<TeamsConnectionBase>("connections", this.getBase());
+        return TeamsConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await TeamsConnection.isIncludes({_id: this._id}))) {
             await insertOne<TeamsConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -89,12 +89,22 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
         return deleteMany<TeamsConnectionBase>("connections", this.getBase());
     }
 
+    // creater
     fromConnection(connection: Connection): TeamsConnection {
         const connectionBase = connection.getBase();
         Object.assign(this, connectionBase);
         return this;
     }
 
+    setConnectionBase(connectionBase: ConnectionBase) {
+        this._id = connectionBase._id;
+        this.clusterId = connectionBase.clusterId;
+        this.name = connectionBase.name;
+        this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
     getBase(): TeamsConnectionBase {
         return {
             _id: this._id,
@@ -104,13 +114,6 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
             active: this.active,
             data: this.data,
         };
-    }
-
-    setConnectionBase(connectionBase: ConnectionBase): void {
-        this._id = connectionBase._id;
-        this.clusterId = connectionBase.clusterId;
-        this.name = connectionBase.name;
-        this.active = connectionBase.active;
     }
 
     getConnectionBase(): ConnectionBase {

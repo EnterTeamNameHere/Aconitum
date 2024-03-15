@@ -31,6 +31,7 @@ class LineConnection extends Connection implements LineConnectionBase {
         }
     }
 
+    // static methods
     static async find(filter: Filter<LineConnectionBase>): Promise<Array<LineConnection>> {
         const connectionBases = await find<LineConnectionBase>("connections", filter);
         const connections = new Array<LineConnection>();
@@ -41,8 +42,7 @@ class LineConnection extends Connection implements LineConnectionBase {
     }
 
     static async findActive(filter: Filter<LineConnectionBase>): Promise<Array<LineConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return LineConnection.find(activeFilter);
     }
 
@@ -55,8 +55,7 @@ class LineConnection extends Connection implements LineConnectionBase {
     }
 
     static async findActiveOne(filter: Filter<LineConnectionBase>): Promise<LineConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return LineConnection.findOne(activeFilter);
     }
 
@@ -77,12 +76,13 @@ class LineConnection extends Connection implements LineConnectionBase {
         return new LineConnection({...connectionBase, platform: "line"});
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<LineConnectionBase>("connections", this.getBase());
+        return LineConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await LineConnection.isIncludes({_id: this._id}))) {
             await insertOne<LineConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -93,12 +93,22 @@ class LineConnection extends Connection implements LineConnectionBase {
         return deleteMany<LineConnectionBase>("connections", this.getBase());
     }
 
+    // creater
     fromConnection(connection: Connection): LineConnection {
         const connectionBase = connection.getBase();
         Object.assign(this, connectionBase);
         return this;
     }
 
+    fromConnectionBase(connectionBase: ConnectionBase) {
+        this._id = connectionBase._id;
+        this.clusterId = connectionBase.clusterId;
+        this.name = connectionBase.name;
+        this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
     getBase(): LineConnectionBase {
         return {
             _id: this._id,
@@ -108,13 +118,6 @@ class LineConnection extends Connection implements LineConnectionBase {
             active: this.active,
             data: this.data,
         };
-    }
-
-    setConnectionBase(connectionBase: ConnectionBase): void {
-        this._id = connectionBase._id;
-        this.clusterId = connectionBase.clusterId;
-        this.name = connectionBase.name;
-        this.active = connectionBase.active;
     }
 
     getConnectionBase(): ConnectionBase {

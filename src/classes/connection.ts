@@ -1,5 +1,5 @@
 import type {ChatInputCommandInteraction} from "discord.js";
-import { ObjectId} from "mongodb";
+import {ObjectId} from "mongodb";
 
 import {checkStringId} from "../utils/db.js";
 
@@ -88,15 +88,7 @@ class Connection {
         return result;
     }
 
-    // static async find<T extends ConnectionBases>(filter: Filter<U>): Promise<Array<T>> {
-    //     const connectionBases = await find<U>("connections", filter);
-    //     const connections = new Array<Connection<T>>();
-    //     for (const connectionBase of connectionBases) {
-    //         connections.push(new Connection<T>(connectionBase));
-    //     }
-    //     return connections;
-    // }
-
+    // set and get
     getBase(): ConnectionBase {
         return {
             _id: this._id,

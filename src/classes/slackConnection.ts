@@ -30,6 +30,7 @@ class SlackConnection extends Connection implements SlackConnectionBase {
         }
     }
 
+    // static methods
     static async find(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
         const connectionBases = await find<SlackConnectionBase>("connections", filter);
         const connections = new Array<SlackConnection>();
@@ -40,8 +41,7 @@ class SlackConnection extends Connection implements SlackConnectionBase {
     }
 
     static async findActive(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return SlackConnection.find(activeFilter);
     }
 
@@ -54,8 +54,7 @@ class SlackConnection extends Connection implements SlackConnectionBase {
     }
 
     static async findActiveOne(filter: Filter<SlackConnectionBase>): Promise<SlackConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return SlackConnection.findOne(activeFilter);
     }
 
@@ -76,12 +75,13 @@ class SlackConnection extends Connection implements SlackConnectionBase {
         return new SlackConnection({...connectionBase, platform: "slack"});
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<SlackConnectionBase>("connections", this.getBase());
+        return SlackConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await SlackConnection.isIncludes({_id: this._id}))) {
             await insertOne<SlackConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -92,12 +92,22 @@ class SlackConnection extends Connection implements SlackConnectionBase {
         return deleteMany<SlackConnectionBase>("connections", this.getBase());
     }
 
-    fromConnectionBase(connection: Connection): SlackConnectionBase {
+    // creater
+    fromConnection(connection: Connection) {
         const connectionBase = connection.getBase();
         Object.assign(this, connectionBase);
         return this;
     }
 
+    fromConnectionBase(connectionBase: ConnectionBase) {
+        this._id = connectionBase._id;
+        this.clusterId = connectionBase.clusterId;
+        this.name = connectionBase.name;
+        this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
     getBase(): SlackConnectionBase {
         return {
             _id: this._id,
@@ -107,13 +117,6 @@ class SlackConnection extends Connection implements SlackConnectionBase {
             active: this.active,
             data: this.data,
         };
-    }
-
-    setConnectionBase(connectionBase: ConnectionBase): void {
-        this._id = connectionBase._id;
-        this.clusterId = connectionBase.clusterId;
-        this.name = connectionBase.name;
-        this.active = connectionBase.active;
     }
 
     getConnectionBase(): ConnectionBase {
