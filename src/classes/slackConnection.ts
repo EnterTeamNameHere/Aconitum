@@ -14,19 +14,17 @@ type SlackConnectionBase = ConnectionBase & {
 };
 
 class SlackConnection extends Connection<SlackConnectionBase> implements SlackConnectionBase {
-    platform: "slack";
+    platform = "slack" as const;
     data: {
         send: string;
         recv: string;
+    } = {
+        send: "",
+        recv: "",
     };
 
     constructor(connection?: Partial<SlackConnectionBase>) {
         super(connection);
-        this.platform = "slack";
-        this.data = {
-            send: "",
-            recv: "",
-        };
         if (connection) {
             Object.assign(this.data, connection.data);
         }
