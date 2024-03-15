@@ -13,17 +13,15 @@ type TeamsConnectionBase = ConnectionBase & {
 };
 
 class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsConnectionBase {
-    platform: "teams";
+    platform = "teams" as const;
     data: {
         sendWebhook: string;
+    } = {
+        sendWebhook: "",
     };
 
     constructor(connection?: Partial<TeamsConnectionBase>) {
         super(connection);
-        this.platform = "teams";
-        this.data = {
-            sendWebhook: "",
-        };
         if (connection) {
             Object.assign(this.data, connection.data);
         }

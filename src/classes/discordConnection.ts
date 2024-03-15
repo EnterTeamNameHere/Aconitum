@@ -16,19 +16,17 @@ type DiscordConnectionBase = ConnectionBase & {
 };
 
 class DiscordConnection extends Connection<DiscordConnectionBase> implements DiscordConnectionBase {
-    platform: "discord";
+    platform = "discord" as const;
     data: {
         channelId: Snowflake;
         channelWebhook: Snowflake;
+    } = {
+        channelId: "",
+        channelWebhook: "",
     };
 
     constructor(connection?: Partial<DiscordConnectionBase>) {
         super(connection);
-        this.platform = "discord";
-        this.data = {
-            channelId: "",
-            channelWebhook: "",
-        };
         if (connection) {
             Object.assign(this.data, connection.data);
         }

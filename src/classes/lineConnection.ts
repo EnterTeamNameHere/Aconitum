@@ -15,19 +15,17 @@ type LineConnectionBase = ConnectionBase & {
 };
 
 class LineConnection extends Connection<LineConnectionBase> implements LineConnectionBase {
-    platform: "line";
+    platform = "line" as const;
     data: {
         id: string;
         token: string;
+    } = {
+        id: "",
+        token: "",
     };
 
     constructor(connection?: Partial<LineConnectionBase>) {
         super(connection);
-        this.platform = "line";
-        this.data = {
-            id: "",
-            token: "",
-        };
         if (connection) {
             Object.assign(this.data, connection.data);
         }

@@ -34,18 +34,13 @@ type Connections = Connection<ConnectionBases> | DiscordConnection | TeamsConnec
 type ConnectionBases = ConnectionBase | DiscordConnectionBase | TeamsConnectionBase | LineConnectionBase | SlackConnectionBase;
 
 class Connection<T extends ConnectionBases> {
-    _id: ObjectId;
-    clusterId: ObjectId;
-    name: string;
-    platform: Platform;
-    active: boolean;
+    _id: ObjectId = new ObjectId("");
+    clusterId: ObjectId = new ObjectId("");
+    name: string = "";
+    platform: Platform = "uncategorized";
+    active: boolean = false;
 
     constructor(connection?: Partial<T>) {
-        this._id = new ObjectId("");
-        this.clusterId = new ObjectId("");
-        this.name = "";
-        this.platform = "uncategorized";
-        this.active = false;
         if (connection) {
             Object.assign(this, connection);
         }
