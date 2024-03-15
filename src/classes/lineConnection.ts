@@ -1,9 +1,9 @@
-import { ObjectId} from "mongodb";
+import {ObjectId} from "mongodb";
 import type {Filter} from "mongodb";
 
-import { deleteMany, find, findOne, isIncludes, updateOrInsert } from "../utils/db.js";
+import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
 
-import {Connection } from "./connection.js";
+import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
 
 type LineConnectionBase = ConnectionBase & {
@@ -71,14 +71,6 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
             active: this.active,
             data: this.data,
         };
-    }
-
-    async find(): Promise<Array<LineConnection>> {
-        return LineConnection.find({_id: this._id});
-    }
-
-    async findOne(): Promise<LineConnection | null> {
-        return LineConnection.findOne({_id: this._id});
     }
 
     async isIncludes(): Promise<boolean> {

@@ -1,8 +1,8 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import { deleteMany, find, findOne, isIncludes, updateOrInsert } from "../utils/db.js";
+import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
 
-import {Connection } from "./connection.js";
+import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
 
 type TeamsConnectionBase = ConnectionBase & {
@@ -67,14 +67,6 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
             active: this.active,
             data: this.data,
         };
-    }
-
-    async find(): Promise<Array<TeamsConnection>> {
-        return TeamsConnection.find({_id: this._id});
-    }
-
-    async findOne(): Promise<TeamsConnection | null> {
-        return TeamsConnection.findOne({_id: this._id});
     }
 
     async isIncludes(): Promise<boolean> {

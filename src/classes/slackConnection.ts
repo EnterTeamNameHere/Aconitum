@@ -1,6 +1,6 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import { deleteMany, find, findOne, isIncludes, updateOrInsert } from "../utils/db.js";
+import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -70,14 +70,6 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
             active: this.active,
             data: this.data,
         };
-    }
-
-    async find(): Promise<Array<SlackConnection>> {
-        return SlackConnection.find({_id: this._id});
-    }
-
-    async findOne(): Promise<SlackConnection | null> {
-        return SlackConnection.findOne({_id: this._id});
     }
 
     async isIncludes(): Promise<boolean> {

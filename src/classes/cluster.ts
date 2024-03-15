@@ -80,14 +80,6 @@ export class Cluster implements ClusterBase {
         return this._id;
     }
 
-    async find(): Promise<Array<Cluster>> {
-        return Cluster.find(this.getBase());
-    }
-
-    async findOne(): Promise<Cluster | null> {
-        return Cluster.findOne(this.getBase());
-    }
-
     async isIncludes(): Promise<boolean> {
         return isIncludes<ClusterBase>("clusters", this.getBase());
     }
@@ -102,9 +94,8 @@ export class Cluster implements ClusterBase {
 
     async checkGuildId(guildId: Snowflake): Promise<boolean> {
         if (await this.isIncludes()) {
-            const cluster = await this.findOne();
-            if (cluster !== null) {
-                return cluster.guildId === guildId;
+            if (await this.isIncludes()) {
+                return this.guildId === guildId;
             }
             return false;
         }

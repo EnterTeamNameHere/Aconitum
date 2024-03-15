@@ -1,10 +1,10 @@
 import type {Snowflake} from "discord-api-types/globals.js";
-import { ObjectId} from "mongodb";
+import {ObjectId} from "mongodb";
 import type {Filter} from "mongodb";
 
-import { deleteMany, find, findOne, isIncludes, updateOrInsert } from "../utils/db.js";
+import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
 
-import {Connection } from "./connection.js";
+import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
 
 type DiscordConnectionBase = ConnectionBase & {
@@ -72,14 +72,6 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
             active: this.active,
             data: this.data,
         };
-    }
-
-    async find(): Promise<Array<DiscordConnection>> {
-        return DiscordConnection.find({_id: this._id});
-    }
-
-    async findOne(): Promise<DiscordConnection | null> {
-        return DiscordConnection.findOne({_id: this._id});
     }
 
     async isIncludes(): Promise<boolean> {
