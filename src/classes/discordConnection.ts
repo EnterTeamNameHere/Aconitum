@@ -22,7 +22,7 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         channelWebhook: Snowflake;
     };
 
-    constructor(connection: Partial<DiscordConnectionBase>) {
+    constructor(connection?: Partial<DiscordConnectionBase>) {
         super(connection);
         this.platform = "discord";
         this.data = {

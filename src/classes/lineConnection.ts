@@ -21,7 +21,7 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         token: string;
     };
 
-    constructor(connection: Partial<LineConnectionBase>) {
+    constructor(connection?: Partial<LineConnectionBase>) {
         super(connection);
         this.platform = "line";
         this.data = {

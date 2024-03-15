@@ -18,7 +18,7 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         sendWebhook: string;
     };
 
-    constructor(connection: Partial<TeamsConnectionBase>) {
+    constructor(connection?: Partial<TeamsConnectionBase>) {
         super(connection);
         this.platform = "teams";
         this.data = {

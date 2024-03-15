@@ -18,7 +18,7 @@ export class Cluster implements ClusterBase {
     name: string;
     active: boolean;
 
-    constructor(cluster: Partial<ClusterBase>) {
+    constructor(cluster?: Partial<ClusterBase>) {
         this._id = new ObjectId("");
         this.guildId = SnowflakeUtil.generate().toString();
         this.name = "";

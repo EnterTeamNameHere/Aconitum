@@ -20,7 +20,7 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         recv: string;
     };
 
-    constructor(connection: Partial<SlackConnectionBase>) {
+    constructor(connection?: Partial<SlackConnectionBase>) {
         super(connection);
         this.platform = "slack";
         this.data = {
