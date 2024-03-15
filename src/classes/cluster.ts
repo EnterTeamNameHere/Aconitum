@@ -79,8 +79,12 @@ export class Cluster implements ClusterBase {
         return isIncludes<ClusterBase>("clusters", this.getBase());
     }
 
-    async register(): Promise<void> {
-        await insertOne<ClusterBase>("clusters", this.getBase());
+    async register(): Promise<boolean> {
+        if (await this.isIncludes()) {
+            await insertOne<ClusterBase>("clusters", this.getBase());
+            return true;
+        }
+        return false;
     }
 
     async remove(): Promise<void> {

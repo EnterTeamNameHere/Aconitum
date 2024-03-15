@@ -1,8 +1,9 @@
 import type {Snowflake} from "discord-api-types/globals.js";
+import type {Client} from "discord.js";
 import {ObjectId} from "mongodb";
 import type {Filter} from "mongodb";
 
-import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -61,6 +62,14 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         await deleteMany<DiscordConnectionBase>("connections", {clusterId});
     }
 
+    static async channelAccessible(client: Client, channelId: Snowflake): Promise<boolean> {
+        try {
+            return (await client.channels.fetch(channelId)) !== null;
+        } catch (e) {
+            return false;
+        }
+    }
+
     getBase(): DiscordConnectionBase {
         return {
             _id: this._id,
@@ -76,19 +85,20 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         return isIncludes<DiscordConnectionBase>("connections", this.getBase());
     }
 
-    async register(): Promise<void> {
-        return updateOrInsert<DiscordConnectionBase>(
-            "connections",
-            {
-                platform: this.platform,
-                name: this.name,
-            },
-            this.getBase(),
-        );
+    async register(): Promise<boolean> {
+        if (await this.isIncludes()) {
+            await insertOne<DiscordConnectionBase>("connections", this.getBase());
+            return true;
+        }
+        return false;
     }
 
     async remove(): Promise<void> {
         return deleteMany<DiscordConnectionBase>("connections", this.getBase());
+    }
+
+    async channelAccessible(client: Client): Promise<boolean> {
+        return DiscordConnection.channelAccessible(client, this.data.channelId);
     }
 
     setConnectionBase(connectionBase: ConnectionBase): void {

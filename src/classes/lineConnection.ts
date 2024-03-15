@@ -1,7 +1,7 @@
 import {ObjectId} from "mongodb";
 import type {Filter} from "mongodb";
 
-import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -75,15 +75,12 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         return isIncludes<LineConnectionBase>("connections", this.getBase());
     }
 
-    async register(): Promise<void> {
-        return updateOrInsert<LineConnectionBase>(
-            "connections",
-            {
-                platform: this.platform,
-                name: this.name,
-            },
-            this.getBase(),
-        );
+    async register(): Promise<boolean> {
+        if (await this.isIncludes()) {
+            await insertOne<LineConnectionBase>("connections", this.getBase());
+            return true;
+        }
+        return false;
     }
 
     async remove(): Promise<void> {
