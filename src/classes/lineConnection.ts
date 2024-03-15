@@ -14,7 +14,7 @@ type LineConnectionBase = ConnectionBase & {
     };
 };
 
-class LineConnection extends Connection<LineConnectionBase> implements LineConnectionBase {
+class LineConnection extends Connection implements LineConnectionBase {
     platform = "line" as const;
     data: {
         id: string;
@@ -31,6 +31,7 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         }
     }
 
+    // static methods
     static async find(filter: Filter<LineConnectionBase>): Promise<Array<LineConnection>> {
         const connectionBases = await find<LineConnectionBase>("connections", filter);
         const connections = new Array<LineConnection>();
@@ -41,8 +42,7 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
     }
 
     static async findActive(filter: Filter<LineConnectionBase>): Promise<Array<LineConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return LineConnection.find(activeFilter);
     }
 
@@ -55,8 +55,7 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
     }
 
     static async findActiveOne(filter: Filter<LineConnectionBase>): Promise<LineConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return LineConnection.findOne(activeFilter);
     }
 
@@ -72,23 +71,18 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         await deleteMany<LineConnectionBase>("connections", {clusterId});
     }
 
-    getBase(): LineConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): LineConnectionBase {
+        const connectionBase = connection.getBase();
+        return new LineConnection({...connectionBase, platform: "line"});
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<LineConnectionBase>("connections", this.getBase());
+        return LineConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await LineConnection.isIncludes({_id: this._id}))) {
             await insertOne<LineConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -99,11 +93,31 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         return deleteMany<LineConnectionBase>("connections", this.getBase());
     }
 
-    setConnectionBase(connectionBase: ConnectionBase): void {
+    // creater
+    fromConnection(connection: Connection): LineConnection {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    fromConnectionBase(connectionBase: ConnectionBase) {
         this._id = connectionBase._id;
         this.clusterId = connectionBase.clusterId;
         this.name = connectionBase.name;
         this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
+    getBase(): LineConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     getConnectionBase(): ConnectionBase {
@@ -116,20 +130,9 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         };
     }
 
-    setId(value: ObjectId): void {
-        this._id = value;
-    }
-
-    getId(): ObjectId {
-        return this._id;
-    }
-
-    setToken(value: string): void {
+    setToken(value: string) {
         this.data.token = value;
-    }
-
-    getToken(): string {
-        return this.data.token;
+        return this;
     }
 }
 

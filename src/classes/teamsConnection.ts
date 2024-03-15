@@ -12,7 +12,7 @@ type TeamsConnectionBase = ConnectionBase & {
     };
 };
 
-class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsConnectionBase {
+class TeamsConnection extends Connection implements TeamsConnectionBase {
     platform = "teams" as const;
     data: {
         sendWebhook: string;
@@ -27,6 +27,7 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         }
     }
 
+    // static methods
     static async find(filter: Filter<TeamsConnectionBase>): Promise<Array<TeamsConnection>> {
         const connectionBases = await find<TeamsConnectionBase>("connections", filter);
         const connections = new Array<TeamsConnection>();
@@ -37,8 +38,7 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
     }
 
     static async findActive(filter: Filter<TeamsConnectionBase>): Promise<Array<TeamsConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return TeamsConnection.find(activeFilter);
     }
 
@@ -51,8 +51,7 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
     }
 
     static async findActiveOne(filter: Filter<TeamsConnectionBase>): Promise<TeamsConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return TeamsConnection.findOne(activeFilter);
     }
 
@@ -68,23 +67,18 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         await deleteMany<TeamsConnectionBase>("connections", {clusterId});
     }
 
-    getBase(): TeamsConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): TeamsConnection {
+        const connectionBase = connection.getBase();
+        return new TeamsConnection({...connectionBase, platform: "teams"});
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<TeamsConnectionBase>("connections", this.getBase());
+        return TeamsConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await TeamsConnection.isIncludes({_id: this._id}))) {
             await insertOne<TeamsConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -95,11 +89,31 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         return deleteMany<TeamsConnectionBase>("connections", this.getBase());
     }
 
-    setConnectionBase(connectionBase: ConnectionBase): void {
+    // creater
+    fromConnection(connection: Connection): TeamsConnection {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    setConnectionBase(connectionBase: ConnectionBase) {
         this._id = connectionBase._id;
         this.clusterId = connectionBase.clusterId;
         this.name = connectionBase.name;
         this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
+    getBase(): TeamsConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     getConnectionBase(): ConnectionBase {
@@ -112,12 +126,9 @@ class TeamsConnection extends Connection<TeamsConnectionBase> implements TeamsCo
         };
     }
 
-    setSendWebhook(sendWebhook: string): void {
+    setSendWebhook(sendWebhook: string) {
         this.data.sendWebhook = sendWebhook;
-    }
-
-    getSendWebhook(): string {
-        return this.data.sendWebhook;
+        return this;
     }
 }
 

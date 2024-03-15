@@ -69,24 +69,6 @@ export class Cluster implements ClusterBase {
         return false;
     }
 
-    getStringId() {
-        return this._id.toHexString();
-    }
-
-    getBase(): ClusterBase {
-        return {
-            _id: this._id,
-            guildId: this.guildId,
-            name: this.name,
-            active: this.active,
-        };
-    }
-
-    setStringId(id?: string) {
-        this._id = new ObjectId(id);
-        return this._id;
-    }
-
     async isIncludes(): Promise<boolean> {
         return isIncludes<ClusterBase>("clusters", this.getBase());
     }
@@ -113,27 +95,41 @@ export class Cluster implements ClusterBase {
         return false;
     }
 
-    setGuildId(guildId: Snowflake) {
-        this.guildId = guildId;
+    getBase(): ClusterBase {
+        return {
+            _id: this._id,
+            guildId: this.guildId,
+            name: this.name,
+            active: this.active,
+        };
     }
 
-    getGuildId() {
-        return this.guildId;
+    setId(id: ObjectId) {
+        this._id = id;
+        return this;
+    }
+
+    setStringId(id?: string) {
+        this._id = new ObjectId(id);
+        return this;
+    }
+
+    getStringId() {
+        return this._id.toHexString();
+    }
+
+    setGuildId(guildId: Snowflake) {
+        this.guildId = guildId;
+        return this;
     }
 
     setName(name: string) {
         this.name = name;
-    }
-
-    getName() {
-        return this.name;
+        return this;
     }
 
     setActive(active: boolean) {
         this.active = active;
-    }
-
-    getActive() {
-        return this.active;
+        return this;
     }
 }
