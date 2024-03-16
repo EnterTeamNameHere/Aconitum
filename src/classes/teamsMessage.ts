@@ -1,7 +1,7 @@
 import type {Client} from "discord.js";
 
 import {TeamsConnection} from "./teamsConnection.js";
-import {UnityMessage } from "./unityMessage.js";
+import {UnityMessage} from "./unityMessage.js";
 import type {UnityMessageBase} from "./unityMessage.js";
 
 export type TeamsMessageBase = UnityMessageBase & {
@@ -24,7 +24,7 @@ export class TeamsMessage extends UnityMessage<TeamsConnection> implements Teams
             platform: "teams",
             clusterId: this.connection.clusterId,
             active: true,
-            $ne: {"data.sendWebhook": this.connection.data.sendWebhook},
+            "data.sendWebhook": {$ne: this.connection.data.sendWebhook},
         });
     }
 }

@@ -1,8 +1,8 @@
 import type {Client} from "discord.js";
 
 import {DiscordConnection} from "./discordConnection.js";
-import {UnityMessage } from "./unityMessage.js";
 import type {UnityMessageBase} from "./unityMessage.js";
+import {UnityMessage} from "./unityMessage.js";
 
 export type DiscordMessageBase = UnityMessageBase & {
     platform: "discord";
@@ -24,7 +24,7 @@ export class DiscordMessage extends UnityMessage<DiscordConnection> implements D
             platform: "discord",
             clusterId: this.connection.clusterId,
             active: true,
-            $ne: {"data.channelId": this.connection.data.channelId},
+            "data.channelId": {$ne: this.connection.data.channelId},
         });
     }
 }

@@ -11,6 +11,7 @@ import {TeamsConnection} from "./teamsConnection.js";
 export type attachment = {
     name: string;
     url: string;
+    type: string | undefined;
 };
 
 export type UnityMessageBase<ConnectionType extends Connection = Connection> = {

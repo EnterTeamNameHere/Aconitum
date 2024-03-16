@@ -7,7 +7,7 @@ import Procs from "../interfaces/eventHandler.js";
 const procs: Procs = function execute(client): void {
     client.on<Events.MessageCreate>(Events.MessageCreate, async message => {
         await (async function teamsReacter() {
-            if (message.channel === null || message.channel.type !== (ChannelType.GuildText || ChannelType.GuildAnnouncement)) {
+            if (message.channel === null || message.channel.type !== (ChannelType.GuildText && ChannelType.GuildAnnouncement)) {
                 return;
             }
             let guildName;
@@ -28,13 +28,25 @@ const procs: Procs = function execute(client): void {
                         .setGuildName(guildName)
                         .setChannelName(channelName)
                         .setUsername(message.author.username)
-                        .setIcon(message.author.avatarURL() ?? undefined)
+                        .setIcon(message.author.displayAvatarURL({extension: "png"}))
                         .setContent(message.content);
                     for (const attachment of message.attachments.values()) {
-                        if (attachment.height !== null && attachment.contentType !== ("webp" || null)) {
-                            discordMessage.addImage(attachment);
+                        if (
+                            attachment.contentType !== null &&
+                            attachment.contentType.split("/")[0] === ("image" || "video") &&
+                            attachment.contentType !== "image/webp"
+                        ) {
+                            discordMessage.addImage({
+                                url: attachment.url,
+                                name: attachment.name,
+                                type: attachment.contentType,
+                            });
                         } else {
-                            discordMessage.addFile(attachment);
+                            discordMessage.addFile({
+                                url: attachment.url,
+                                name: attachment.name,
+                                type: attachment.contentType ?? undefined,
+                            });
                         }
                     }
                     await discordMessage.sendAll();
