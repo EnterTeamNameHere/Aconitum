@@ -1,6 +1,7 @@
 import type {ChatInputCommandInteraction} from "discord.js";
-import { ObjectId} from "mongodb";
+import {ObjectId} from "mongodb";
 
+import type {ModalData} from "../commands/teams.js";
 import {checkStringId, deleteMany, find} from "../utils/db.js";
 import {autoDeleteMessage} from "../utils/tools.js";
 
@@ -106,14 +107,21 @@ class Connection {
                 await deleteMany<ConnectionBase>("connections", {_id: connection._id});
             }
         }
+    }
 
-        console.log("Cache clear start");
-        await this.cacheClear();
-        console.log("Cache clear done");
+    static async allCacheClear() {
+        await deleteMany<ModalData>("connectionCaches", {});
     }
 
     static async cacheClear() {
-        await deleteMany<ConnectionBase>("connectionCaches", {});
+        const caches = await find<ModalData>("connectionCaches", {});
+        for (const cache of caches) {
+            const timestamp = cache.timestamp.getTime();
+            const now = new Date().getTime();
+            if (now - timestamp > 1000 * 60) {
+                await deleteMany<ModalData>("connectionCaches", {_id: cache._id});
+            }
+        }
     }
 
     // set and get

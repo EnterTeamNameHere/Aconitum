@@ -11,6 +11,9 @@ export async function startCheckUp(client: Client) {
     console.log("Connection CheckUp start");
     await Connection.autoDelete();
     console.log("Connection CheckUp Done");
+    console.log("Cache clear start");
+    await Connection.allCacheClear();
+    console.log("Cache clear done");
     console.log("Discord unaccesible remove start");
     await DiscordConnection.removeUnaccesible(client);
     console.log("Discord unaccesible remove done");
