@@ -7,6 +7,7 @@ import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils
 export type ClusterBase = {
     _id: ObjectId;
     guildIds: Array<Snowflake>;
+    inviteList: Array<Snowflake>;
     name: string;
     active: boolean;
 };
@@ -14,6 +15,7 @@ export type ClusterBase = {
 export class Cluster implements ClusterBase {
     _id: ObjectId = new ObjectId();
     guildIds: Array<Snowflake> = new Array<Snowflake>();
+    inviteList: Array<Snowflake> = new Array<Snowflake>();
     name: string = "";
     active: boolean = false;
 
@@ -101,6 +103,7 @@ export class Cluster implements ClusterBase {
         return {
             _id: this._id,
             guildIds: this.guildIds,
+            inviteList: this.inviteList,
             name: this.name,
             active: this.active,
         };
@@ -132,6 +135,21 @@ export class Cluster implements ClusterBase {
 
     removeGuildId(guildId: Snowflake) {
         this.guildIds = this.guildIds.filter(id => id !== guildId);
+        return this;
+    }
+
+    setInviteList(inviteList: Array<Snowflake>) {
+        this.inviteList = inviteList;
+        return this;
+    }
+
+    addInviteList(invite: Snowflake) {
+        this.inviteList.push(invite);
+        return this;
+    }
+
+    removeInviteList(invite: Snowflake) {
+        this.inviteList = this.inviteList.filter(id => id !== invite);
         return this;
     }
 
