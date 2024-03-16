@@ -1,5 +1,5 @@
-import {ObjectId } from "mongodb";
-import type {Filter,UpdateFilter} from "mongodb";
+import {ObjectId} from "mongodb";
+import type {Filter, UpdateFilter} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
@@ -97,7 +97,7 @@ class LineConnection extends Connection implements LineConnectionBase {
     }
 
     async remove(): Promise<void> {
-        return deleteMany<LineConnectionBase>("connections", this.getBase());
+        await LineConnection.remove(this._id);
     }
 
     async update(filter: Filter<LineConnectionBase> = {_id: this._id}): Promise<this> {

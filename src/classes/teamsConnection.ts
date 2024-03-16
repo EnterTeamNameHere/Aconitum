@@ -93,7 +93,7 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
     }
 
     async remove(): Promise<void> {
-        return deleteMany<TeamsConnectionBase>("connections", this.getBase());
+        await TeamsConnection.remove(this._id);
     }
 
     async update(filter: Filter<TeamsConnectionBase> = {_id: this._id}): Promise<TeamsConnection> {

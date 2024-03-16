@@ -1,6 +1,6 @@
 import type {Snowflake} from "discord-api-types/globals.js";
 import type {Client} from "discord.js";
-import type { Filter, UpdateFilter} from "mongodb";
+import type {Filter, UpdateFilter} from "mongodb";
 import {ObjectId} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
@@ -103,7 +103,7 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
     }
 
     async remove(): Promise<void> {
-        return deleteMany<DiscordConnectionBase>("connections", this.getBase());
+        await DiscordConnection.remove(this._id);
     }
 
     async update(filter: Filter<DiscordConnectionBase> = {_id: this._id}): Promise<this> {

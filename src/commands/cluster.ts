@@ -3,7 +3,6 @@ import {EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder} from "discord.js
 import {ObjectId} from "mongodb";
 
 import {Cluster} from "../classes/cluster.js";
-import {Connection} from "../classes/connection.js";
 import {Commands} from "../interfaces/command";
 import {checkStringId} from "../utils/db.js";
 
@@ -94,7 +93,6 @@ const commands: Commands = [
                     return;
                 }
                 await cluster.remove();
-                await Connection.removeCluster(clusterId);
                 await interaction.editReply("クラスターを削除しました");
             } catch (e) {
                 await interaction.editReply("実行中にエラーが発生しました");

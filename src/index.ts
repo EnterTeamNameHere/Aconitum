@@ -5,6 +5,7 @@ import {Client, Events, GatewayIntentBits} from "discord.js";
 import express from "express";
 
 import {Command} from "./interfaces/command.js";
+import {startCheckUp} from "./utils/checkUp.js";
 import config from "./utils/envConf.js";
 import line from "./utils/line.js";
 import {getSourceFiles} from "./utils/tools.js";
@@ -35,6 +36,8 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
             }
         });
     }
+
+    await startCheckUp(client);
 
     console.log("Ready");
 });
