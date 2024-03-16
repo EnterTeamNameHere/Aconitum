@@ -1,6 +1,6 @@
 import axios from "axios";
-import type {Client, WebhookMessageCreateOptions} from "discord.js";
-import {AttachmentBuilder, WebhookClient} from "discord.js";
+import type {APIEmbedField, Client, WebhookMessageCreateOptions} from "discord.js";
+import {  AttachmentBuilder ,EmbedBuilder, WebhookClient} from "discord.js";
 import {ObjectId} from "mongodb";
 
 import type {Connections, Platform} from "./connection.js";
@@ -64,6 +64,14 @@ export class UnityMessage<ConnectionType extends Connections> implements UnityMe
                 }
 
                 const webhookClient = new WebhookClient({url: discordConnection.data.channelWebhook});
+                const fealds: Array<APIEmbedField> = new Array<APIEmbedField>();
+                fealds.push({name: "Platform", value: this.platform});
+                if (this.guildname) {
+                    fealds.push({name: "Guild", value: this.guildname});
+                }
+                if (this.channelName) {
+                    fealds.push({name: "Channel", value: this.channelName});
+                }
                 const message: WebhookMessageCreateOptions = {
                     avatarURL: this.icon,
                     username: this.username,
@@ -71,6 +79,7 @@ export class UnityMessage<ConnectionType extends Connections> implements UnityMe
                     files: this.getAttachments().map<AttachmentBuilder>(
                         attachment => new AttachmentBuilder(attachment.url, {name: attachment.name}),
                     ),
+                    embeds: [new EmbedBuilder().setColor(0x777777).setFields(fealds)],
                 };
 
                 await webhookClient.send(message);
