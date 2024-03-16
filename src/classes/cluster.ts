@@ -1,4 +1,6 @@
 import type {Snowflake} from "discord-api-types/globals.js";
+import { DiscordAPIError} from "discord.js";
+import type {Client} from "discord.js";
 import type {Filter} from "mongodb";
 import {ObjectId} from "mongodb";
 
@@ -74,6 +76,18 @@ export class Cluster implements ClusterBase {
             return cluster.guildIds.includes(guildId);
         }
         return false;
+    }
+
+    static async guildAccessible(client: Client, guildId: Snowflake): Promise<boolean> {
+        try {
+            const guildData = await client.guilds.fetch(guildId);
+            return !!guildData;
+        } catch (e) {
+            if (e instanceof DiscordAPIError && e.code === 10004) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     // dynamic methods
