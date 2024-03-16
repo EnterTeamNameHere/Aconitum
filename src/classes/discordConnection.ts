@@ -1,6 +1,6 @@
 import type {Snowflake} from "discord-api-types/globals.js";
 import type {Client} from "discord.js";
-import type { Filter, UpdateFilter} from "mongodb";
+import type {Filter, UpdateFilter} from "mongodb";
 import {ObjectId} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
@@ -80,10 +80,19 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         await DiscordConnection.update(filter, updateData);
     }
 
+    static async removeUnaccesible(client: Client): Promise<void> {
+        const connections = await DiscordConnection.find({platform: "discord"});
+        for (const connection of connections) {
+            if (!(await connection.channelAccessible(client))) {
+                await connection.remove();
+            }
+        }
+    }
+
     // static Discord only methods
     static async channelAccessible(client: Client, channelId: Snowflake): Promise<boolean> {
         try {
-            return (await client.channels.fetch(channelId)) !== null;
+            return !!(await client.channels.fetch(channelId));
         } catch (e) {
             return false;
         }
@@ -103,7 +112,7 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
     }
 
     async remove(): Promise<void> {
-        return deleteMany<DiscordConnectionBase>("connections", this.getBase());
+        await DiscordConnection.remove(this._id);
     }
 
     async update(filter: Filter<DiscordConnectionBase> = {_id: this._id}): Promise<this> {

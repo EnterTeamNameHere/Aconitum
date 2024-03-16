@@ -3,7 +3,6 @@ import {EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder} from "discord.js
 import {ObjectId} from "mongodb";
 
 import {Cluster} from "../classes/cluster.js";
-import {Connection} from "../classes/connection.js";
 import {Commands} from "../interfaces/command";
 import {checkStringId} from "../utils/db.js";
 
@@ -63,7 +62,7 @@ const commands: Commands = [
                     fields.push({name: cluster.name, value: cluster.getStringId()});
                 }
                 if (fields.length === 0) {
-                    await interaction.reply("クラスターはありません");
+                    await interaction.editReply("クラスターはありません");
                     return;
                 }
                 await interaction.editReply({
@@ -71,7 +70,7 @@ const commands: Commands = [
                     embeds: [new EmbedBuilder().setColor(0x777777).addFields(fields)],
                 });
             } catch (e) {
-                await interaction.reply("実行中にエラーが発生しました");
+                await interaction.editReply("実行中にエラーが発生しました");
                 console.error(`[ERR]: ${e}`);
             }
         },
@@ -94,7 +93,6 @@ const commands: Commands = [
                     return;
                 }
                 await cluster.remove();
-                await Connection.removeCluster(clusterId);
                 await interaction.editReply("クラスターを削除しました");
             } catch (e) {
                 await interaction.editReply("実行中にエラーが発生しました");
