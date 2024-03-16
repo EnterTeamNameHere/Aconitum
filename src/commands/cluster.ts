@@ -24,7 +24,7 @@ const commands: Commands = [
                 }
                 const cluster = new Cluster({
                     _id: clusterId,
-                    guildId,
+                    guildIds: [guildId],
                     name: clusterName,
                     active: true,
                 });

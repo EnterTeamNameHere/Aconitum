@@ -6,14 +6,14 @@ import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
 export type ClusterBase = {
     _id: ObjectId;
-    guildId: Snowflake;
+    guildIds: Array<Snowflake>;
     name: string;
     active: boolean;
 };
 
 export class Cluster implements ClusterBase {
     _id: ObjectId = new ObjectId();
-    guildId: Snowflake = "";
+    guildIds: Array<Snowflake> = new Array<Snowflake>();
     name: string = "";
     active: boolean = false;
 
@@ -64,7 +64,7 @@ export class Cluster implements ClusterBase {
         const clusterObjectId = new ObjectId(clusterId);
         const cluster = await Cluster.findOne({_id: clusterObjectId});
         if (cluster !== null) {
-            return cluster.guildId === guildId;
+            return cluster.guildIds.includes(guildId);
         }
         return false;
     }
@@ -85,20 +85,10 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", this.getBase());
     }
 
-    async checkGuildId(guildId: Snowflake): Promise<boolean> {
-        if (await this.isIncludes()) {
-            if (await this.isIncludes()) {
-                return this.guildId === guildId;
-            }
-            return false;
-        }
-        return false;
-    }
-
     getBase(): ClusterBase {
         return {
             _id: this._id,
-            guildId: this.guildId,
+            guildIds: this.guildIds,
             name: this.name,
             active: this.active,
         };
@@ -118,8 +108,18 @@ export class Cluster implements ClusterBase {
         return this._id.toHexString();
     }
 
-    setGuildId(guildId: Snowflake) {
-        this.guildId = guildId;
+    setGuildId(guildIds: Array<Snowflake>) {
+        this.guildIds = guildIds;
+        return this;
+    }
+
+    addGuildId(guildId: Snowflake) {
+        this.guildIds.push(guildId);
+        return this;
+    }
+
+    removeGuildId(guildId: Snowflake) {
+        this.guildIds = this.guildIds.filter(id => id !== guildId);
         return this;
     }
 
