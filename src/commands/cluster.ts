@@ -42,6 +42,43 @@ const commands: Commands = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("cluster-list")
+            .setDescription("クラスターのリストを表示します")
+            .setDMPermission(false)
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        async execute(interaction: ChatInputCommandInteraction) {
+            try {
+                await interaction.deferReply({ephemeral: true});
+
+                const {guildId} = interaction;
+                if (guildId === null) {
+                    throw new Error("Interaction's guildId is null");
+                }
+                const clusters = await Cluster.findActive({guildIds: {$elemMatch: {$eq: guildId}}});
+                const fields = new Array<{
+                    name: string;
+                    value: string;
+                }>();
+                for (const cluster of clusters) {
+                    fields.push({name: cluster.name, value: cluster.getStringId()});
+                }
+                if (fields.length === 0) {
+                    await interaction.reply("クラスターはありません");
+                    return;
+                }
+                await interaction.editReply({
+                    content: "クラスターのリスト",
+                    embeds: [new EmbedBuilder().setColor(0x777777).addFields(fields)],
+                });
+            } catch (e) {
+                await interaction.reply("実行中にエラーが発生しました");
+                console.error(`[ERR]: ${e}`);
+            }
+        },
+        global: true,
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("delete-cluster")
             .setDescription("クラスターを削除します")
             .setDMPermission(false)
@@ -51,7 +88,7 @@ const commands: Commands = [
             try {
                 await interaction.deferReply({ephemeral: true});
                 const clusterId = new ObjectId(interaction.options.getString("cluster-id", true));
-                const cluster = await Cluster.findOne({_id: clusterId});
+                const cluster = await Cluster.findActiveOne({_id: clusterId});
                 if (cluster === null) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
@@ -88,7 +125,7 @@ const commands: Commands = [
                     return;
                 }
                 const clusterIdObject = new ObjectId(clusterId);
-                const cluster = await Cluster.findOne({_id: clusterIdObject});
+                const cluster = await Cluster.findActiveOne({_id: clusterIdObject});
                 if (cluster === null) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
@@ -111,11 +148,11 @@ const commands: Commands = [
                 const receiverGuild = await interaction.client.guilds.fetch(receiverGuildId);
                 const announce = receiverGuild.systemChannel;
                 if (announce !== null) {
-                    const fealds: Array<APIEmbedField> = [
+                    const fields: Array<APIEmbedField> = [
                         {name: "クラスター名", value: cluster.name},
                         {name: "サーバー名", value: senderGuild.name},
                     ];
-                    const embet = new EmbedBuilder().setColor(0x777777).setFields(fealds);
+                    const embet = new EmbedBuilder().setColor(0x777777).setFields(fields);
                     await announce.send({content: "クラスターへの招待が届いています！", embeds: [embet]});
                 }
 
@@ -148,7 +185,10 @@ const commands: Commands = [
                     await interaction.editReply("クラスターIDが不適切です");
                     return;
                 }
-                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId), guildIds: {$elemMatch: {$eq: guildId}}});
+                const cluster = await Cluster.findActiveOne({
+                    _id: new ObjectId(clusterId),
+                    guildIds: {$elemMatch: {$eq: guildId}},
+                });
                 if (cluster === null) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
@@ -187,7 +227,10 @@ const commands: Commands = [
                     await interaction.editReply("クラスターIDが不適切です");
                     return;
                 }
-                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId), guildIds: {$elemMatch: {$eq: guildId}}});
+                const cluster = await Cluster.findActiveOne({
+                    _id: new ObjectId(clusterId),
+                    guildIds: {$elemMatch: {$eq: guildId}},
+                });
                 if (cluster === null) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
@@ -233,7 +276,7 @@ const commands: Commands = [
                 if (guildId === null) {
                     throw new Error("Interaction's guildId is null");
                 }
-                const invitedClusterList = await Cluster.find({inviteList: {$elemMatch: {$eq: guildId}}});
+                const invitedClusterList = await Cluster.findActive({inviteList: {$elemMatch: {$eq: guildId}}});
                 const invitedList = new Array<{
                     name: string;
                     value: string;
@@ -277,7 +320,7 @@ const commands: Commands = [
                     return;
                 }
                 const clusterId = new ObjectId(stringClusterId);
-                const cluster = await Cluster.findOne({_id: clusterId});
+                const cluster = await Cluster.findActiveOne({_id: clusterId});
                 if (cluster === null) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
