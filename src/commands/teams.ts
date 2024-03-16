@@ -1,4 +1,5 @@
 import axios from "axios";
+import type {ModalActionRowComponentBuilder} from "discord.js";
 import {
     ActionRowBuilder,
     ChatInputCommandInteraction,
@@ -8,7 +9,6 @@ import {
     TextInputBuilder,
     TextInputStyle,
 } from "discord.js";
-import type {ModalActionRowComponentBuilder} from "discord.js";
 import {ObjectId} from "mongodb";
 
 import {Cluster} from "../classes/cluster.js";
@@ -32,22 +32,23 @@ const commands: Commands = [
             .addStringOption(option => option.setName("connection-name").setDescription("接続の名前").setRequired(true)),
         async execute(interaction: ChatInputCommandInteraction) {
             // 以下、ラグが発生してDiscord側でエラー吐くので意図的にキモい処理順序になってます
+            const authNumber = Math.floor(Math.random() * 1000000)
+                .toString()
+                .padStart(6, "0");
+            const tmpModalData: ModalData = {
+                _id: new ObjectId(),
+                clusterId: new ObjectId(),
+                name: "",
+                platform: "teams",
+                active: false,
+                data: {
+                    sendWebhook: "",
+                },
+                authNumber,
+                timestamp: new Date(),
+            };
+
             try {
-                const authNumber = Math.floor(Math.random() * 1000000)
-                    .toString()
-                    .padStart(6, "0");
-                const tmpModalData: ModalData = {
-                    _id: new ObjectId(),
-                    clusterId: new ObjectId(),
-                    name: "",
-                    platform: "teams",
-                    active: false,
-                    data: {
-                        sendWebhook: "",
-                    },
-                    authNumber,
-                    timestamp: new Date(),
-                };
                 await insertOne<ModalData>("connectionCaches", tmpModalData);
 
                 const actionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
@@ -62,6 +63,7 @@ const commands: Commands = [
                 const teamsWebhook = interaction.options.getString("teams-webhook", true);
                 const connectionBase = await Connection.createConnectionData(interaction);
                 if (connectionBase === null) {
+                    await deleteMany<ModalData>("connectionCaches", {_id: tmpModalData._id});
                     return;
                 }
                 const connection: TeamsConnection = new TeamsConnection({
@@ -74,8 +76,13 @@ const commands: Commands = [
                 });
 
                 const cluster = await Cluster.findOne({_id: new ObjectId(interaction.options.getString("cluster-id", true))});
+                const {channel} = interaction;
                 if (cluster === null) {
-                    throw new Error("cluster not found");
+                    if (channel) {
+                        await autoDeleteMessage(channel, "指定されたクラスターが見つかりませんでした。", 5);
+                        await deleteMany<ModalData>("connectionCaches", {_id: tmpModalData._id});
+                    }
+                    return;
                 }
 
                 const modalData = {
@@ -92,25 +99,25 @@ const commands: Commands = [
                     await new Promise(resolve => {
                         setTimeout(resolve, 60000);
                     });
-                    await deleteMany<ModalData>("connectionCaches", {_id: modalData._id});
+                    await deleteMany<ModalData>("connectionCaches", {_id: tmpModalData._id});
                 } catch (e) {
-                    await interaction.editReply("WebhookのURIが間違っています。");
-                    await deleteMany<ModalData>("connectionCaches", {_id: modalData._id});
+                    const errorChannel = interaction.channel;
+                    if (errorChannel) {
+                        await autoDeleteMessage(errorChannel, "WebhookのURIが間違っています。", 5);
+                    }
+                    await deleteMany<ModalData>("connectionCaches", {_id: tmpModalData._id});
                 }
             } catch (e) {
-                console.error(`[ERR]: ${e}`);
-                const {channel} = interaction;
-                if (!channel) {
-                    return;
-                }
-                if (interaction.isRepliable()) {
-                    if (interaction.deferred) {
-                        await interaction.editReply({content: "実行中にエラーが発生しました。"});
-                    } else {
-                        await interaction.reply({content: "実行中にエラーが発生しました。"});
+                try {
+                    console.error(`[ERR]: ${e}`);
+                    await deleteMany<ModalData>("connectionCaches", {_id: tmpModalData._id});
+                    const errorChannel = interaction.channel;
+                    if (errorChannel) {
+                        await autoDeleteMessage(errorChannel, "実行中にエラーが発生しました。", 5);
                     }
-                } else {
-                    await autoDeleteMessage(channel, "実行中にエラーが発生しました。", 5);
+                } catch (error) {
+                    await deleteMany<ModalData>("connectionCaches", {_id: tmpModalData._id});
+                    console.error(`[ERR]: ${error}`);
                 }
             }
         },
@@ -127,3 +134,4 @@ const commands: Commands = [
 ];
 
 export default commands;
+export {ModalData};

@@ -62,7 +62,7 @@ const commands: Commands = [
                     fields.push({name: cluster.name, value: cluster.getStringId()});
                 }
                 if (fields.length === 0) {
-                    await interaction.reply("クラスターはありません");
+                    await interaction.editReply("クラスターはありません");
                     return;
                 }
                 await interaction.editReply({
@@ -70,7 +70,7 @@ const commands: Commands = [
                     embeds: [new EmbedBuilder().setColor(0x777777).addFields(fields)],
                 });
             } catch (e) {
-                await interaction.reply("実行中にエラーが発生しました");
+                await interaction.editReply("実行中にエラーが発生しました");
                 console.error(`[ERR]: ${e}`);
             }
         },

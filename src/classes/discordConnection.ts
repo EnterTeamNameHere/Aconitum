@@ -80,10 +80,19 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         await DiscordConnection.update(filter, updateData);
     }
 
+    static async removeUnaccesible(client: Client): Promise<void> {
+        const connections = await DiscordConnection.find({platform: "discord"});
+        for (const connection of connections) {
+            if (!(await connection.channelAccessible(client))) {
+                await connection.remove();
+            }
+        }
+    }
+
     // static Discord only methods
     static async channelAccessible(client: Client, channelId: Snowflake): Promise<boolean> {
         try {
-            return (await client.channels.fetch(channelId)) !== null;
+            return !!(await client.channels.fetch(channelId));
         } catch (e) {
             return false;
         }

@@ -1,7 +1,8 @@
 import type {ChatInputCommandInteraction} from "discord.js";
-import {ObjectId} from "mongodb";
+import { ObjectId} from "mongodb";
 
-import {checkStringId, deleteMany} from "../utils/db.js";
+import {checkStringId, deleteMany, find} from "../utils/db.js";
+import {autoDeleteMessage} from "../utils/tools.js";
 
 import {Cluster} from "./cluster.js";
 import type {DiscordConnectionBase} from "./discordConnection.js";
@@ -67,16 +68,23 @@ class Connection {
         })();
 
         if (typeof result === "string") {
-            const {deferred, channel} = interaction;
-            const repliable = interaction.isRepliable();
-            if (repliable) {
-                if (deferred) {
+            const {replied, channel} = interaction;
+            const modalSubmit = interaction.isModalSubmit();
+            try {
+                if (modalSubmit && channel) {
+                    await autoDeleteMessage(channel, result, 5);
+                }
+                if (replied) {
                     await interaction.editReply(result);
                 } else {
                     await interaction.reply(result);
                 }
-            } else if (channel) {
-                await channel.send(result);
+            } catch {
+                if (channel) {
+                    await autoDeleteMessage(channel, result, 5);
+                } else {
+                    throw new Error("Interaction's channel is null");
+                }
             }
             return null;
         }
@@ -85,6 +93,27 @@ class Connection {
 
     static async removeCluster(clusterId: ObjectId): Promise<void> {
         await deleteMany<ConnectionBase>("connections", {clusterId});
+    }
+
+    static async autoDelete() {
+        const connectionBases = await find<ConnectionBase>("connections", {});
+        const connections = new Array<Connection>();
+        for (const connectionBase of connectionBases) {
+            connections.push(new Connection(connectionBase));
+        }
+        for (const connection of connections) {
+            if (!(await Cluster.isIncludes({_id: connection.clusterId}))) {
+                await deleteMany<ConnectionBase>("connections", {_id: connection._id});
+            }
+        }
+
+        console.log("Cache clear start");
+        await this.cacheClear();
+        console.log("Cache clear done");
+    }
+
+    static async cacheClear() {
+        await deleteMany<ConnectionBase>("connectionCaches", {});
     }
 
     // set and get
