@@ -9,19 +9,16 @@ import type {ConnectionBase} from "./connection.js";
 type LineConnectionBase = ConnectionBase & {
     platform: "line";
     data: {
-        id: string;
-        token: string;
+        groupId: string;
     };
 };
 
 class LineConnection extends Connection<LineConnectionBase> implements LineConnectionBase {
     platform = "line" as const;
     data: {
-        id: string;
-        token: string;
+        groupId: string;
     } = {
-        id: "",
-        token: "",
+        groupId: "",
     };
 
     constructor(connection?: Partial<LineConnectionBase>) {
@@ -115,12 +112,12 @@ class LineConnection extends Connection<LineConnectionBase> implements LineConne
         return this._id;
     }
 
-    setToken(value: string): void {
-        this.data.token = value;
+    setGroupId(value: string): void {
+        this.data.groupId = value;
     }
 
-    getToken(): string {
-        return this.data.token;
+    getGroupId(): string {
+        return this.data.groupId;
     }
 }
 
