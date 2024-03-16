@@ -1,23 +1,22 @@
-import {readdirSync} from "node:fs";
 import {join} from "path";
 
 import {RESTPostAPIChatInputApplicationCommandsJSONBody} from "discord-api-types/v10";
 import {REST, Routes} from "discord.js";
 
 import config from "./utils/envConf.js";
+import {getSourceFiles} from "./utils/tools.js";
 
 const __dirname = import.meta.dirname;
 
 const globalCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
 const guildCommandArray = new Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
 const commandsPath = join(__dirname, "commands");
-const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js") || file.endsWith(".ts"));
 const rest = new REST().setToken(config.token);
 
 (async () => {
-    console.log(commandsPath);
+    const commandsFiles = getSourceFiles(commandsPath);
     for (const file of commandsFiles) {
-        const filePath = `file://${join(commandsPath, file)}`;
+        const filePath = `file://${file}`;
         await import(filePath).then(commands => {
             for (const command of commands.default) {
                 if (command.global) {

@@ -1,4 +1,3 @@
-import {readdirSync} from "fs";
 import {join} from "path";
 
 import lineSdk from "@line/bot-sdk";
@@ -8,6 +7,7 @@ import express from "express";
 import {Command} from "./interfaces/command.js";
 import config from "./utils/envConf.js";
 import line from "./utils/line.js";
+import {getSourceFiles} from "./utils/tools.js";
 
 const __dirname = import.meta.dirname;
 
@@ -15,15 +15,20 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 
-const lineClient = new lineSdk.Client({channelAccessToken: config.line.channelAccessToken, channelSecret: config.line.channelSecret});
+const lineClient = new lineSdk.Client({
+    channelAccessToken: config.line.channelAccessToken,
+    channelSecret: config.line.channelSecret,
+});
 const apiServer = express();
 
 const commandList = new Map<string, Command>();
 const commandsPath = join(__dirname, "commands");
-const commandsFiles = readdirSync(commandsPath).filter(file => file.endsWith(".js") || file.endsWith(".ts"));
+let commandsFiles = new Array<string>();
+
 client.once<Events.ClientReady>(Events.ClientReady, async () => {
+    commandsFiles = getSourceFiles(commandsPath);
     for (const file of commandsFiles) {
-        const filePath = `file://${join(commandsPath, file)}`;
+        const filePath = `file://${file}`;
         await import(filePath).then(commands => {
             for (const command of commands.default) {
                 commandList.set(command.data.name, command);
@@ -37,7 +42,10 @@ export default commandList;
 
 apiServer.post(
     "/line-webhook",
-    lineSdk.middleware({channelAccessToken: config.line.channelAccessToken, channelSecret: config.line.channelSecret}),
+    lineSdk.middleware({
+        channelAccessToken: config.line.channelAccessToken,
+        channelSecret: config.line.channelSecret,
+    }),
     async (req: express.Request, res: express.Response): Promise<express.Response> => {
         for (const event of req.body.events) {
             try {
@@ -55,9 +63,9 @@ apiServer.post(
 
 (async () => {
     const handlersPath = join(__dirname, "eventHandlers");
-    const handlersFiles = readdirSync(handlersPath).filter(file => file.endsWith(".js") || file.endsWith(".ts"));
+    const handlersFiles = getSourceFiles(handlersPath);
     for (const file of handlersFiles) {
-        const filePath = `file://${join(handlersPath, file)}`;
+        const filePath = `file://${file}`;
         await import(filePath).then(handlers => {
             handlers.default(client);
         });
