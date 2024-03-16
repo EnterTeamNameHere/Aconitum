@@ -5,17 +5,13 @@ import {Connection} from "../classes/connection.js";
 import {DiscordConnection} from "../classes/discordConnection.js";
 
 export async function startCheckUp(client: Client) {
-    console.log("Cluster CheckUp start");
+    console.log("checkup: cluster");
     await Cluster.autoDelete(client);
-    console.log("Cluster CheckUp Done");
-    console.log("Connection CheckUp start");
+    console.log("checkup: connection");
     await Connection.autoDelete();
-    console.log("Connection CheckUp Done");
-    console.log("Cache clear start");
+    console.log("checkup: cache");
     await Connection.allCacheClear();
-    console.log("Cache clear done");
-    console.log("Discord unaccesible remove start");
+    console.log("checkup: discord");
     await DiscordConnection.removeUnaccesible(client);
-    console.log("Discord unaccesible remove done");
     console.log();
 }
