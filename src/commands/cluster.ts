@@ -41,6 +41,24 @@ const commands: Commands = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("delete-cluster")
+            .setDescription("クラスターを削除します")
+            .setDMPermission(false)
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+            .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true)),
+        async execute(interaction: ChatInputCommandInteraction) {
+            const clusterId = interaction.options.getString("cluster-id", true);
+            const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
+            if (cluster === null) {
+                await interaction.editReply("クラスターが見つかりませんでした");
+                return;
+            }
+            await cluster.remove();
+        },
+        global: true,
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("invite-server")
             .setDescription("クラスターにサーバーを追加します")
             .setDMPermission(false)
