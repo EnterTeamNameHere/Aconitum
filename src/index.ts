@@ -1,6 +1,6 @@
 import {join} from "path";
 
-import lineSDK from "@line/bot-sdk";
+import lineSdk from "@line/bot-sdk";
 import {Client, Events, GatewayIntentBits} from "discord.js";
 import express from "express";
 
@@ -17,11 +17,11 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildWebhooks],
 });
 
-const lineClient = new lineSDK.Client({
+const lineClient = new lineSdk.Client({
     channelAccessToken: config.line.channelAccessToken,
     channelSecret: config.line.channelSecret,
 });
-const APIServer = express();
+const apiServer = express();
 
 const commandList = new Map<string, Command>();
 const commandsPath = join(__dirname, "commands");
@@ -45,16 +45,16 @@ client.once<Events.ClientReady>(Events.ClientReady, async () => {
 });
 export default commandList;
 
-APIServer.post(
+apiServer.post(
     "/line-webhook",
-    lineSDK.middleware({
+    lineSdk.middleware({
         channelAccessToken: config.line.channelAccessToken,
         channelSecret: config.line.channelSecret,
     }),
     async (req: express.Request, res: express.Response): Promise<express.Response> => {
         for (const event of req.body.events) {
             try {
-                await line.platformEventHandler(lineClient, event);
+                await line.platformEventHandler(client, lineClient, event);
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     console.error(e);
@@ -79,5 +79,5 @@ APIServer.post(
 
 (async () => {
     await client.login(config.token);
-    APIServer.listen(config.line.port, () => console.log(`API Server is Ready! (at http://localhost:${config.line.port}/)`));
+    apiServer.listen(config.line.port, () => console.log(`API Server is Ready! (at http://localhost:${config.line.port}/)`));
 })();
