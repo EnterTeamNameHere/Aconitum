@@ -13,12 +13,6 @@ import {SlackConnection} from "./slackConnection.js";
 import type {TeamsConnectionBase} from "./teamsConnection.js";
 import {TeamsConnection} from "./teamsConnection.js";
 
-// export type OmitFunction<T> = Pick<
-//   T,
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   {[K in keyof T]: T[K] extends (...args: any) => any ? never : K}[keyof T]
-// >
-
 export type CollectionName = "clusters" | "connections" | "connectionCaches";
 export type Platform = "uncategorized" | "discord" | "teams" | "line" | "slack";
 
@@ -46,6 +40,7 @@ class Connection {
         }
     }
 
+    // static methods
     static async createConnectionData(interaction: ChatInputCommandInteraction): Promise<ConnectionBase | null> {
         const result = await (async (): Promise<ConnectionBase | string> => {
             const clusterId = interaction.options.getString("cluster-id", true);
@@ -136,6 +131,7 @@ class Connection {
         this.platform = value;
         return this;
     }
+
     setActive(value: boolean) {
         this.active = value;
         return this;

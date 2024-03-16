@@ -1,6 +1,6 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -75,6 +75,10 @@ class SlackConnection extends Connection implements SlackConnectionBase {
         return new SlackConnection({...connectionBase, platform: "slack"});
     }
 
+    static async update(filter: Filter<SlackConnectionBase>, updateData: Partial<SlackConnectionBase>): Promise<void> {
+        await update<SlackConnectionBase>("connections", filter, updateData);
+    }
+
     // dynamic methods
     async isIncludes(): Promise<boolean> {
         return SlackConnection.isIncludes(this.getBase());
@@ -90,6 +94,10 @@ class SlackConnection extends Connection implements SlackConnectionBase {
 
     async remove(): Promise<void> {
         return deleteMany<SlackConnectionBase>("connections", this.getBase());
+    }
+
+    async update(filter: Filter<SlackConnectionBase>): Promise<void> {
+        await SlackConnection.update(filter, this.getBase());
     }
 
     // creater

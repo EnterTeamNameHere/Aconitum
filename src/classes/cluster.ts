@@ -2,7 +2,7 @@ import type {Snowflake} from "discord-api-types/globals.js";
 import type {Filter} from "mongodb";
 import {ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
 export type ClusterBase = {
     _id: ObjectId;
@@ -23,6 +23,7 @@ export class Cluster implements ClusterBase {
         }
     }
 
+    // static methods
     static async find(filter: Filter<ClusterBase>): Promise<Array<Cluster>> {
         const clusterBases = await find<ClusterBase>("clusters", filter);
         const clusters = new Array<Cluster>();
@@ -60,6 +61,10 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", {_id: clusterId});
     }
 
+    static async update(filter: Filter<ClusterBase>, updateData: Partial<ClusterBase>): Promise<void> {
+        await update<ClusterBase>("clusters", filter, updateData);
+    }
+
     static async checkGuildId(clusterId: string, guildId: Snowflake): Promise<boolean> {
         const clusterObjectId = new ObjectId(clusterId);
         const cluster = await Cluster.findOne({_id: clusterObjectId});
@@ -69,6 +74,7 @@ export class Cluster implements ClusterBase {
         return false;
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
         return isIncludes<ClusterBase>("clusters", this.getBase());
     }
@@ -85,6 +91,12 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", this.getBase());
     }
 
+    async update(filter: Filter<ClusterBase>): Promise<this> {
+        await update<ClusterBase>("clusters", filter, this.getBase());
+        return this;
+    }
+
+    // set / get
     getBase(): ClusterBase {
         return {
             _id: this._id,

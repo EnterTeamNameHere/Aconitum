@@ -1,6 +1,6 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -72,6 +72,10 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
         return new TeamsConnection({...connectionBase, platform: "teams"});
     }
 
+    static async update(filter: Filter<TeamsConnectionBase>, updateData: Partial<TeamsConnectionBase>): Promise<void> {
+        await update<TeamsConnectionBase>("connections", filter, updateData);
+    }
+
     // dynamic methods
     async isIncludes(): Promise<boolean> {
         return TeamsConnection.isIncludes(this.getBase());
@@ -87,6 +91,11 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
 
     async remove(): Promise<void> {
         return deleteMany<TeamsConnectionBase>("connections", this.getBase());
+    }
+
+    async update(filter: Filter<TeamsConnectionBase>) {
+        await update<TeamsConnectionBase>("connections", filter, this.getBase());
+        return this;
     }
 
     // creater
