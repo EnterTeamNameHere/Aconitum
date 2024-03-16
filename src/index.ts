@@ -14,7 +14,7 @@ import {getSourceFiles} from "./utils/tools.js";
 const __dirname = import.meta.dirname;
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildWebhooks],
 });
 
 const lineClient = new lineSDK.Client({
