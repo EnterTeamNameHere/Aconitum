@@ -10,6 +10,10 @@ const procs: Procs = function execute(client): void {
             if (message.channel === null || message.channel.type !== (ChannelType.GuildText && ChannelType.GuildAnnouncement)) {
                 return;
             }
+            if (message.author.bot) {
+                return;
+            }
+
             let guildName;
             if (message.guild === null) {
                 guildName = "Direct Message"; // For future use
@@ -27,7 +31,7 @@ const procs: Procs = function execute(client): void {
                         .setConnection(discordChannel)
                         .setGuildName(guildName)
                         .setChannelName(channelName)
-                        .setUsername(message.author.username)
+                        .setUsername(message.author.displayName)
                         .setIcon(message.author.displayAvatarURL({extension: "png"}))
                         .setContent(message.content);
                     for (const attachment of message.attachments.values()) {

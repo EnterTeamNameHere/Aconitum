@@ -1,7 +1,7 @@
-import {ObjectId} from "mongodb";
-import type {Filter} from "mongodb";
+import {ObjectId } from "mongodb";
+import type {Filter,UpdateFilter} from "mongodb";
 
-import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -76,6 +76,13 @@ class LineConnection extends Connection implements LineConnectionBase {
         return new LineConnection({...connectionBase, platform: "line"});
     }
 
+    static async update(
+        filter: Filter<LineConnectionBase>,
+        updateData: UpdateFilter<LineConnectionBase> | Array<LineConnectionBase>,
+    ): Promise<void> {
+        await update<LineConnectionBase>("connections", filter, updateData);
+    }
+
     // dynamic methods
     async isIncludes(): Promise<boolean> {
         return LineConnection.isIncludes(this.getBase());
@@ -91,6 +98,11 @@ class LineConnection extends Connection implements LineConnectionBase {
 
     async remove(): Promise<void> {
         return deleteMany<LineConnectionBase>("connections", this.getBase());
+    }
+
+    async update(filter: Filter<LineConnectionBase> = {_id: this._id}): Promise<this> {
+        await LineConnection.update(filter, {$set: this.getBase()});
+        return this;
     }
 
     // creater

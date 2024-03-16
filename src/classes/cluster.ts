@@ -1,19 +1,25 @@
 import type {Snowflake} from "discord-api-types/globals.js";
-import type {Filter} from "mongodb";
+import type {Client} from "discord.js";
+import {DiscordAPIError} from "discord.js";
+import type {Filter, UpdateFilter} from "mongodb";
 import {ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
+
+import type {ConnectionBase} from "./connection.js";
 
 export type ClusterBase = {
     _id: ObjectId;
-    guildId: Snowflake;
+    guildIds: Array<Snowflake>;
+    inviteList: Array<Snowflake>;
     name: string;
     active: boolean;
 };
 
 export class Cluster implements ClusterBase {
     _id: ObjectId = new ObjectId();
-    guildId: Snowflake = "";
+    guildIds: Array<Snowflake> = new Array<Snowflake>();
+    inviteList: Array<Snowflake> = new Array<Snowflake>();
     name: string = "";
     active: boolean = false;
 
@@ -23,6 +29,7 @@ export class Cluster implements ClusterBase {
         }
     }
 
+    // static methods
     static async find(filter: Filter<ClusterBase>): Promise<Array<Cluster>> {
         const clusterBases = await find<ClusterBase>("clusters", filter);
         const clusters = new Array<Cluster>();
@@ -60,15 +67,32 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", {_id: clusterId});
     }
 
+    static async update(filter: Filter<ClusterBase>, updateData: UpdateFilter<ConnectionBase> | Array<ConnectionBase>): Promise<void> {
+        await update<ClusterBase>("clusters", filter, updateData);
+    }
+
     static async checkGuildId(clusterId: string, guildId: Snowflake): Promise<boolean> {
         const clusterObjectId = new ObjectId(clusterId);
         const cluster = await Cluster.findOne({_id: clusterObjectId});
         if (cluster !== null) {
-            return cluster.guildId === guildId;
+            return cluster.guildIds.includes(guildId);
         }
         return false;
     }
 
+    static async guildAccessible(client: Client, guildId: Snowflake): Promise<boolean> {
+        try {
+            const guildData = await client.guilds.fetch(guildId);
+            return !!guildData;
+        } catch (e) {
+            if (e instanceof DiscordAPIError && e.code === 10004) {
+                return false;
+            }
+            throw e;
+        }
+    }
+
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
         return isIncludes<ClusterBase>("clusters", this.getBase());
     }
@@ -85,20 +109,17 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", this.getBase());
     }
 
-    async checkGuildId(guildId: Snowflake): Promise<boolean> {
-        if (await this.isIncludes()) {
-            if (await this.isIncludes()) {
-                return this.guildId === guildId;
-            }
-            return false;
-        }
-        return false;
+    async update(filter: Filter<ClusterBase> = {_id: this._id}): Promise<this> {
+        await Cluster.update(filter, {$set: this.getBase()});
+        return this;
     }
 
+    // set / get
     getBase(): ClusterBase {
         return {
             _id: this._id,
-            guildId: this.guildId,
+            guildIds: this.guildIds,
+            inviteList: this.inviteList,
             name: this.name,
             active: this.active,
         };
@@ -118,8 +139,33 @@ export class Cluster implements ClusterBase {
         return this._id.toHexString();
     }
 
-    setGuildId(guildId: Snowflake) {
-        this.guildId = guildId;
+    setGuildId(guildIds: Array<Snowflake>) {
+        this.guildIds = guildIds;
+        return this;
+    }
+
+    addGuildId(guildId: Snowflake) {
+        this.guildIds.push(guildId);
+        return this;
+    }
+
+    removeGuildId(guildId: Snowflake) {
+        this.guildIds = this.guildIds.filter(id => id !== guildId);
+        return this;
+    }
+
+    setInviteList(inviteList: Array<Snowflake>) {
+        this.inviteList = inviteList;
+        return this;
+    }
+
+    addInviteList(invite: Snowflake) {
+        this.inviteList.push(invite);
+        return this;
+    }
+
+    removeInviteList(invite: Snowflake) {
+        this.inviteList = this.inviteList.filter(id => id !== invite);
         return this;
     }
 
