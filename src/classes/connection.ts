@@ -1,7 +1,7 @@
 import type {ChatInputCommandInteraction} from "discord.js";
 import {ObjectId} from "mongodb";
 
-import {checkStringId} from "../utils/db.js";
+import {checkStringId, deleteMany} from "../utils/db.js";
 
 import {Cluster} from "./cluster.js";
 import type {DiscordConnectionBase} from "./discordConnection.js";
@@ -81,6 +81,10 @@ class Connection {
             return null;
         }
         return result;
+    }
+
+    static async removeCluster(clusterId: ObjectId): Promise<void> {
+        await deleteMany<ConnectionBase>("connections", {clusterId});
     }
 
     // set and get

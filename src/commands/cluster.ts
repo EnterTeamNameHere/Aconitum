@@ -3,6 +3,7 @@ import {EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder} from "discord.js
 import {ObjectId} from "mongodb";
 
 import {Cluster} from "../classes/cluster.js";
+import {Connection} from "../classes/connection.js";
 import {Commands} from "../interfaces/command";
 import {checkStringId} from "../utils/db.js";
 
@@ -47,13 +48,21 @@ const commands: Commands = [
             .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
             .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true)),
         async execute(interaction: ChatInputCommandInteraction) {
-            const clusterId = interaction.options.getString("cluster-id", true);
-            const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
-            if (cluster === null) {
-                await interaction.editReply("クラスターが見つかりませんでした");
-                return;
+            try {
+                await interaction.deferReply({ephemeral: true});
+                const clusterId = new ObjectId(interaction.options.getString("cluster-id", true));
+                const cluster = await Cluster.findOne({_id: clusterId});
+                if (cluster === null) {
+                    await interaction.editReply("クラスターが見つかりませんでした");
+                    return;
+                }
+                await cluster.remove();
+                await Connection.removeCluster(clusterId);
+                await interaction.editReply("クラスターを削除しました");
+            } catch (e) {
+                await interaction.editReply("実行中にエラーが発生しました");
+                console.error(`[ERR]: ${e}`);
             }
-            await cluster.remove();
         },
         global: true,
     },
@@ -130,67 +139,115 @@ const commands: Commands = [
             .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true))
             .addStringOption(option => option.setName("server-id").setDescription("サーバーのID").setRequired(true)),
         async execute(interaction: ChatInputCommandInteraction) {
-            const clusterId = interaction.options.getString("cluster-id", true);
-            if (!(await checkStringId(clusterId))) {
-                await interaction.editReply("クラスターIDが不適切です");
-                return;
-            }
-            const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
-            if (cluster === null) {
-                await interaction.editReply("クラスターが見つかりませんでした");
-                return;
-            }
-            const receiverGuildId = interaction.options.getString("server-id", true);
-            if (cluster.inviteList.includes(receiverGuildId)) {
-                await interaction.editReply("指定されたサーバーに招待はありません");
-                return;
-            }
+            try {
+                await interaction.deferReply({ephemeral: true});
+                const clusterId = interaction.options.getString("cluster-id", true);
+                if (!(await checkStringId(clusterId))) {
+                    await interaction.editReply("クラスターIDが不適切です");
+                    return;
+                }
+                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
+                if (cluster === null) {
+                    await interaction.editReply("クラスターが見つかりませんでした");
+                    return;
+                }
+                const receiverGuildId = interaction.options.getString("server-id", true);
+                if (cluster.inviteList.includes(receiverGuildId)) {
+                    await interaction.editReply("指定されたサーバーに招待はありません");
+                    return;
+                }
 
-            cluster.removeInviteList(receiverGuildId);
-            await interaction.editReply("招待を削除しました");
+                cluster.removeInviteList(receiverGuildId);
+                await interaction.editReply("招待を削除しました");
+            } catch (e) {
+                await interaction.editReply("実行中にエラーが発生しました");
+                console.error(`[ERR]: ${e}`);
+            }
         },
         global: true,
     },
     {
         data: new SlashCommandBuilder()
-            .setName("inviting-lit")
+            .setName("inviting-list")
             .setDescription("クラスターの招待リストを表示します")
             .setDMPermission(false)
             .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
             .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true)),
         async execute(interaction: ChatInputCommandInteraction) {
-            const {client} = interaction;
-            const clusterId = interaction.options.getString("cluster-id", true);
-            if (!(await checkStringId(clusterId))) {
-                await interaction.editReply("クラスターIDが不適切です");
-                return;
-            }
-            const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
-            if (cluster === null) {
-                await interaction.editReply("クラスターが見つかりませんでした");
-                return;
-            }
-            const inviteIdList = cluster.inviteList;
-            const inviteList = new Array<{
-                name: string;
-                value: string;
-            }>();
-            for (const inviteId of inviteIdList) {
-                if (await Cluster.guildAccessible(client, inviteId)) {
-                    const guild = await client.guilds.fetch(inviteId);
-                    inviteList.push({name: guild.name, value: inviteId});
-                } else {
-                    cluster.removeInviteList(inviteId);
+            try {
+                await interaction.deferReply({ephemeral: true});
+                const {client} = interaction;
+                const clusterId = interaction.options.getString("cluster-id", true);
+                if (!(await checkStringId(clusterId))) {
+                    await interaction.editReply("クラスターIDが不適切です");
+                    return;
                 }
+                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
+                if (cluster === null) {
+                    await interaction.editReply("クラスターが見つかりませんでした");
+                    return;
+                }
+                const inviteIdList = cluster.inviteList;
+                const inviteList = new Array<{
+                    name: string;
+                    value: string;
+                }>();
+                for (const inviteId of inviteIdList) {
+                    if (await Cluster.guildAccessible(client, inviteId)) {
+                        const guild = await client.guilds.fetch(inviteId);
+                        inviteList.push({name: guild.name, value: inviteId});
+                    } else {
+                        cluster.removeInviteList(inviteId);
+                    }
+                }
+                if (inviteList.length === 0) {
+                    await interaction.editReply("招待リストは空です");
+                    return;
+                }
+                await interaction.editReply({
+                    content: "招待リスト",
+                    embeds: [new EmbedBuilder().setColor(0x777777).addFields(inviteList)],
+                });
+            } catch (e) {
+                await interaction.editReply("実行中にエラーが発生しました");
+                console.error(`[ERR]: ${e}`);
             }
-            if (inviteList.length === 0) {
-                await interaction.editReply("招待リストは空です");
-                return;
+        },
+        global: true,
+    },
+    {
+        data: new SlashCommandBuilder()
+            .setName("invited-list")
+            .setDescription("このサーバーを招待しているクラスターのリストを表示します")
+            .setDMPermission(false)
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        async execute(interaction: ChatInputCommandInteraction) {
+            try {
+                await interaction.deferReply({ephemeral: true});
+                const {guildId} = interaction;
+                if (guildId === null) {
+                    throw new Error("Interaction's guildId is null");
+                }
+                const invitedClusterList = await Cluster.find({inviteList: {$elemMatch: {$eq: guildId}}});
+                const invitedList = new Array<{
+                    name: string;
+                    value: string;
+                }>();
+                for (const cluster of invitedClusterList) {
+                    invitedList.push({name: cluster.name, value: cluster.getStringId()});
+                }
+                if (invitedList.length === 0) {
+                    await interaction.editReply("招待されているクラスターはありません");
+                    return;
+                }
+                await interaction.editReply({
+                    content: "招待されているクラスター",
+                    embeds: [new EmbedBuilder().setColor(0x777777).addFields(invitedList)],
+                });
+            } catch (e) {
+                await interaction.editReply("実行中にエラーが発生しました");
+                console.error(`[ERR]: ${e}`);
             }
-            await interaction.editReply({
-                content: "招待リスト",
-                embeds: [new EmbedBuilder().setColor(0x777777).addFields(inviteList)],
-            });
         },
         global: true,
     },
