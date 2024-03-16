@@ -15,7 +15,8 @@ const commands: Commands = [
             .setDMPermission(false)
             .addStringOption(option => option.setName("cluster-id").setDescription("クラスターのID").setRequired(true))
             .addStringOption(option => option.setName("connection-name").setDescription("接続の名前").setRequired(true))
-            .addChannelOption(option => option.setName("slack-webhook").setDescription("Slack側のWebhookURL").setRequired(true)),
+            .addStringOption(option => option.setName("slack-webhook").setDescription("Slack側のWebhookURL").setRequired(true))
+            .addStringOption(option => option.setName("slack-channelID").setDescription("SlackのチャンネルID").setRequired(true)),
         async execute(interaction) {
             try {
                 await interaction.deferReply({ephemeral: true});
@@ -54,6 +55,9 @@ const commands: Commands = [
                 }
                 await interaction.editReply({
                     content: `${interaction.options.getString("connection-name")}をクラスター${cluster.name}に登録しました。`,
+                });
+                await slackChannel.editReply({
+                    content: `${interaction.options.getString("slack-channelID")}`,
                 });
             } catch (e) {
                 await interaction.editReply({content: "実行中にエラーが発生しました。"});
