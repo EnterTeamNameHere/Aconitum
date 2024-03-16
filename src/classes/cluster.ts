@@ -12,7 +12,7 @@ export type ClusterBase = {
 };
 
 export class Cluster implements ClusterBase {
-    _id: ObjectId = new ObjectId("");
+    _id: ObjectId = new ObjectId();
     guildId: Snowflake = "";
     name: string = "";
     active: boolean = false;

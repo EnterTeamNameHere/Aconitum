@@ -1,6 +1,6 @@
 import axios from "axios";
-import {AttachmentBuilder,  WebhookClient } from "discord.js";
 import type {Client, WebhookMessageCreateOptions} from "discord.js";
+import {AttachmentBuilder, WebhookClient} from "discord.js";
 import {ObjectId} from "mongodb";
 
 import type {Connections, Platform} from "./connection.js";
@@ -13,9 +13,9 @@ export type attachment = {
     url: string;
 };
 
-export type UnityMessageBase = {
+export type UnityMessageBase<ConnectionType extends Connection = Connection> = {
     platform: Platform;
-    connection: Connections;
+    connection: ConnectionType;
     guildname: string | undefined;
     channelName: string | undefined;
     username: string | undefined;
@@ -25,10 +25,10 @@ export type UnityMessageBase = {
     files: Array<attachment>;
 };
 
-export class UnityMessage implements UnityMessageBase {
+export class UnityMessage<ConnectionType extends Connections> implements UnityMessageBase {
     client: Client;
     platform: Platform = "uncategorized";
-    connection: Connections = new Connection();
+    connection: ConnectionType;
     guildname: string | undefined = undefined;
     channelName: string | undefined = undefined;
     username: string | undefined = undefined;
@@ -37,8 +37,9 @@ export class UnityMessage implements UnityMessageBase {
     images: Array<attachment> = [];
     files: Array<attachment> = [];
 
-    constructor(client: Client, base?: UnityMessageBase) {
+    constructor(client: Client, connection: ConnectionType, base?: UnityMessageBase) {
         this.client = client;
+        this.connection = connection;
         if (base) {
             Object.assign(this, base);
         }
@@ -53,10 +54,7 @@ export class UnityMessage implements UnityMessageBase {
     }
 
     async sendDiscord() {
-        const discordConnections = await DiscordConnection.find({
-            platform: "discord",
-            clusterId: this.connection.clusterId,
-        });
+        const discordConnections = await this.sendingDiscordChannels();
         for (const discordConnection of discordConnections) {
             try {
                 if (!(await discordConnection.channelAccessible(this.client))) {
@@ -82,10 +80,6 @@ export class UnityMessage implements UnityMessageBase {
     }
 
     async sendTeams() {
-        const teamsConnections = await TeamsConnection.find({
-            platform: "teams",
-            clusterId: this.connection.clusterId,
-        });
         const messageCard = {
             "@type": "MessageCard",
             "@context": "https://schema.org/extensions",
@@ -105,6 +99,8 @@ export class UnityMessage implements UnityMessageBase {
             ],
             themeColor: "9B59B6",
         };
+
+        const teamsConnections = await this.sendingTeamsChannels();
         for (const teamsConnection of teamsConnections) {
             try {
                 const webhookURI = teamsConnection.data.sendWebhook;
@@ -122,34 +118,52 @@ export class UnityMessage implements UnityMessageBase {
 
     setPlatform(platform: Platform) {
         this.platform = platform;
+        return this;
     }
 
-    setConnection(connection: Connections) {
+    setConnection(connection: ConnectionType) {
         this.connection = connection;
+        return this;
     }
 
     setConnectionId(connectionId: ObjectId) {
         this.connection._id = connectionId;
+        return this;
+    }
+
+    setGuildName(guildname: string | undefined) {
+        this.guildname = guildname;
+        return this;
+    }
+
+    setChannelName(channelName: string | undefined) {
+        this.channelName = channelName;
+        return this;
+    }
+
+    setUsername(username: string | undefined) {
+        this.username = username;
+        return this;
+    }
+
+    setIcon(icon: string | undefined) {
+        this.icon = icon;
+        return this;
     }
 
     setContent(content: string) {
         this.content = content;
-    }
-
-    setUsername(username: string) {
-        this.username = username;
-    }
-
-    setIcon(icon: string) {
-        this.icon = icon;
+        return this;
     }
 
     addImage(image: attachment) {
         this.images.push(image);
+        return this;
     }
 
     addFile(attachment: attachment) {
         this.files.push(attachment);
+        return this;
     }
 
     getAttachments() {
@@ -168,5 +182,21 @@ export class UnityMessage implements UnityMessageBase {
             images: this.images,
             files: this.files,
         };
+    }
+
+    protected async sendingDiscordChannels(): Promise<Array<DiscordConnection>> {
+        return DiscordConnection.find({
+            platform: "discord",
+            clusterId: this.connection.clusterId,
+            active: true,
+        });
+    }
+
+    protected async sendingTeamsChannels(): Promise<Array<TeamsConnection>> {
+        return TeamsConnection.find({
+            platform: "teams",
+            clusterId: this.connection.clusterId,
+            active: true,
+        });
     }
 }
