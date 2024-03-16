@@ -34,8 +34,8 @@ type Connections = Connection | DiscordConnection | TeamsConnection | LineConnec
 type ConnectionBases = ConnectionBase | DiscordConnectionBase | TeamsConnectionBase | LineConnectionBase | SlackConnectionBase;
 
 class Connection {
-    _id: ObjectId = new ObjectId("");
-    clusterId: ObjectId = new ObjectId("");
+    _id: ObjectId = new ObjectId();
+    clusterId: ObjectId = new ObjectId();
     name: string = "";
     platform: Platform = "uncategorized";
     active: boolean = false;

@@ -12,7 +12,7 @@ export type ClusterBase = {
 };
 
 export class Cluster implements ClusterBase {
-    _id: ObjectId = new ObjectId("");
+    _id: ObjectId = new ObjectId();
     guildId: Snowflake = "";
     name: string = "";
     active: boolean = false;
@@ -74,7 +74,7 @@ export class Cluster implements ClusterBase {
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await Cluster.isIncludes({_id: this._id}))) {
             await insertOne<ClusterBase>("clusters", this.getBase());
             return true;
         }
