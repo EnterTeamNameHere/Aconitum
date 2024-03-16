@@ -6,6 +6,7 @@ import {ObjectId} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
+import {Connection } from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
 
 export type ClusterBase = {
@@ -92,6 +93,43 @@ export class Cluster implements ClusterBase {
         }
     }
 
+    static async autoDelete(client: Client): Promise<void> {
+        const clusters = await Cluster.find({});
+        const guildIds = new Set<Snowflake>();
+        for (const cluster of clusters) {
+            for (const guildId of cluster.guildIds) {
+                guildIds.add(guildId);
+            }
+            for (const invite of cluster.inviteList) {
+                guildIds.add(invite);
+            }
+        }
+        guildIds.forEach(value => {
+            const guildId = value;
+            Cluster.guildAccessible(client, guildId).then(accessible => {
+                if (!accessible) {
+                    Cluster.find({guildIds: {$elemMatch: {$eq: guildId}}}).then(hitClusters => {
+                        for (const cluster of hitClusters) {
+                            cluster.removeGuildId(guildId);
+                            if (cluster.guildIds.length === 0) {
+                                Connection.removeCluster(cluster._id);
+                                cluster.remove();
+                            } else {
+                                cluster.update();
+                            }
+                        }
+                    });
+                    Cluster.find({inviteList: {$elemMatch: {$eq: guildId}}}).then(hitClusters => {
+                        for (const cluster of hitClusters) {
+                            cluster.removeInviteList(guildId);
+                            cluster.update();
+                        }
+                    });
+                }
+            });
+        });
+    }
+
     // dynamic methods
     async isIncludes(): Promise<boolean> {
         return isIncludes<ClusterBase>("clusters", this.getBase());
@@ -106,7 +144,8 @@ export class Cluster implements ClusterBase {
     }
 
     async remove(): Promise<void> {
-        await deleteMany<ClusterBase>("clusters", this.getBase());
+        await Connection.removeCluster(this._id);
+        await Cluster.remove(this._id);
     }
 
     async update(filter: Filter<ClusterBase> = {_id: this._id}): Promise<this> {

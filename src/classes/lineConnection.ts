@@ -94,7 +94,7 @@ class LineConnection extends Connection implements LineConnectionBase {
     }
 
     async remove(): Promise<void> {
-        return deleteMany<LineConnectionBase>("connections", this.getBase());
+        await LineConnection.remove(this._id);
     }
 
     async update(filter: Filter<LineConnectionBase> = {_id: this._id}): Promise<this> {
