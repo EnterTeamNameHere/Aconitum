@@ -110,17 +110,15 @@ const commands: Commands = [
 
                 const receiverGuild = await interaction.client.guilds.fetch(receiverGuildId);
                 const announce = receiverGuild.systemChannel;
-                if (announce === null) {
-                    await interaction.editReply("招待を送信できませんでした");
-                    return;
+                if (announce !== null) {
+                    const fealds: Array<APIEmbedField> = [
+                        {name: "クラスター名", value: cluster.name},
+                        {name: "サーバー名", value: senderGuild.name},
+                    ];
+                    const embet = new EmbedBuilder().setColor(0x777777).setFields(fealds);
+                    await announce.send({content: "クラスターへの招待が届いています！", embeds: [embet]});
                 }
 
-                const fealds: Array<APIEmbedField> = [
-                    {name: "クラスター名", value: cluster.name},
-                    {name: "サーバー名", value: senderGuild.name},
-                ];
-                const embet = new EmbedBuilder().setColor(0x777777).setFields(fealds);
-                await announce.send({content: "クラスターへの招待が届いています！", embeds: [embet]});
                 await cluster.addInviteList(receiverGuildId).update();
                 await interaction.editReply("招待を送信しました");
             } catch (e) {
@@ -141,18 +139,22 @@ const commands: Commands = [
         async execute(interaction: ChatInputCommandInteraction) {
             try {
                 await interaction.deferReply({ephemeral: true});
+                const {guildId} = interaction;
+                if (guildId === null) {
+                    throw new Error("Interaction's guildId is null");
+                }
                 const clusterId = interaction.options.getString("cluster-id", true);
                 if (!(await checkStringId(clusterId))) {
                     await interaction.editReply("クラスターIDが不適切です");
                     return;
                 }
-                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
+                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId), guildIds: {$elemMatch: {$eq: guildId}}});
                 if (cluster === null) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
                 }
                 const receiverGuildId = interaction.options.getString("server-id", true);
-                if (cluster.inviteList.includes(receiverGuildId)) {
+                if (!cluster.inviteList.includes(receiverGuildId)) {
                     await interaction.editReply("指定されたサーバーに招待はありません");
                     return;
                 }
@@ -185,12 +187,8 @@ const commands: Commands = [
                     await interaction.editReply("クラスターIDが不適切です");
                     return;
                 }
-                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId)});
+                const cluster = await Cluster.findOne({_id: new ObjectId(clusterId), guildIds: {$elemMatch: {$eq: guildId}}});
                 if (cluster === null) {
-                    await interaction.editReply("クラスターが見つかりませんでした");
-                    return;
-                }
-                if (!cluster.guildIds.includes(guildId)) {
                     await interaction.editReply("クラスターが見つかりませんでした");
                     return;
                 }
