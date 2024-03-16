@@ -9,4 +9,5 @@ export type Config = {
         channelSecret: string;
         port: number;
     };
+    slackToken: string;
 };

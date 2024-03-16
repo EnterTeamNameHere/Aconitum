@@ -8,5 +8,6 @@
         "channelAccessToken": "",
         "channelSecret": "",
         "port": 0
-    }
+    },
+    "slackToken": ""
 }
