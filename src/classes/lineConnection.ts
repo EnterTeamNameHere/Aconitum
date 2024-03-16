@@ -1,5 +1,5 @@
-import {ObjectId} from "mongodb";
-import type {Filter} from "mongodb";
+import {ObjectId } from "mongodb";
+import type {Filter,UpdateFilter} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
@@ -76,7 +76,10 @@ class LineConnection extends Connection implements LineConnectionBase {
         return new LineConnection({...connectionBase, platform: "line"});
     }
 
-    static async update(filter: Filter<LineConnectionBase>, updateData: Partial<LineConnectionBase>): Promise<void> {
+    static async update(
+        filter: Filter<LineConnectionBase>,
+        updateData: UpdateFilter<LineConnectionBase> | Array<LineConnectionBase>,
+    ): Promise<void> {
         await update<LineConnectionBase>("connections", filter, updateData);
     }
 
@@ -97,8 +100,8 @@ class LineConnection extends Connection implements LineConnectionBase {
         return deleteMany<LineConnectionBase>("connections", this.getBase());
     }
 
-    async update(filter: Filter<LineConnectionBase>): Promise<this> {
-        await LineConnection.update(filter, this.getBase());
+    async update(filter: Filter<LineConnectionBase> = {_id: this._id}): Promise<this> {
+        await LineConnection.update(filter, {$set: this.getBase()});
         return this;
     }
 

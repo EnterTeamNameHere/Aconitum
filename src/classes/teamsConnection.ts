@@ -1,4 +1,4 @@
-import type {Filter, ObjectId} from "mongodb";
+import type {Filter, ObjectId, UpdateFilter} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
@@ -72,7 +72,10 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
         return new TeamsConnection({...connectionBase, platform: "teams"});
     }
 
-    static async update(filter: Filter<TeamsConnectionBase>, updateData: Partial<TeamsConnectionBase>): Promise<void> {
+    static async update(
+        filter: Filter<TeamsConnectionBase>,
+        updateData: UpdateFilter<TeamsConnectionBase> | Array<TeamsConnectionBase>,
+    ): Promise<void> {
         await update<TeamsConnectionBase>("connections", filter, updateData);
     }
 
@@ -93,8 +96,8 @@ class TeamsConnection extends Connection implements TeamsConnectionBase {
         return deleteMany<TeamsConnectionBase>("connections", this.getBase());
     }
 
-    async update(filter: Filter<TeamsConnectionBase>) {
-        await update<TeamsConnectionBase>("connections", filter, this.getBase());
+    async update(filter: Filter<TeamsConnectionBase> = {_id: this._id}): Promise<TeamsConnection> {
+        await update<TeamsConnectionBase>("connections", filter, {$set: this.getBase()});
         return this;
     }
 

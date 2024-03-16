@@ -1,10 +1,12 @@
 import type {Snowflake} from "discord-api-types/globals.js";
-import { DiscordAPIError} from "discord.js";
 import type {Client} from "discord.js";
-import type {Filter} from "mongodb";
+import {DiscordAPIError} from "discord.js";
+import type {Filter, UpdateFilter} from "mongodb";
 import {ObjectId} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
+
+import type {ConnectionBase} from "./connection.js";
 
 export type ClusterBase = {
     _id: ObjectId;
@@ -65,7 +67,7 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", {_id: clusterId});
     }
 
-    static async update(filter: Filter<ClusterBase>, updateData: Partial<ClusterBase>): Promise<void> {
+    static async update(filter: Filter<ClusterBase>, updateData: UpdateFilter<ConnectionBase> | Array<ConnectionBase>): Promise<void> {
         await update<ClusterBase>("clusters", filter, updateData);
     }
 
@@ -107,8 +109,8 @@ export class Cluster implements ClusterBase {
         await deleteMany<ClusterBase>("clusters", this.getBase());
     }
 
-    async update(filter: Filter<ClusterBase>): Promise<this> {
-        await update<ClusterBase>("clusters", filter, this.getBase());
+    async update(filter: Filter<ClusterBase> = {_id: this._id}): Promise<this> {
+        await Cluster.update(filter, {$set: this.getBase()});
         return this;
     }
 

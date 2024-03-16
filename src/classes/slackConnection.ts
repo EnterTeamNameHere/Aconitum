@@ -1,4 +1,4 @@
-import type {Filter, ObjectId} from "mongodb";
+import type {Filter, ObjectId, UpdateFilter} from "mongodb";
 
 import {deleteMany, find, findOne, insertOne, isIncludes, update} from "../utils/db.js";
 
@@ -75,7 +75,10 @@ class SlackConnection extends Connection implements SlackConnectionBase {
         return new SlackConnection({...connectionBase, platform: "slack"});
     }
 
-    static async update(filter: Filter<SlackConnectionBase>, updateData: Partial<SlackConnectionBase>): Promise<void> {
+    static async update(
+        filter: Filter<SlackConnectionBase>,
+        updateData: UpdateFilter<SlackConnectionBase> | Array<SlackConnectionBase>,
+    ): Promise<void> {
         await update<SlackConnectionBase>("connections", filter, updateData);
     }
 
@@ -96,8 +99,8 @@ class SlackConnection extends Connection implements SlackConnectionBase {
         return deleteMany<SlackConnectionBase>("connections", this.getBase());
     }
 
-    async update(filter: Filter<SlackConnectionBase>): Promise<void> {
-        await SlackConnection.update(filter, this.getBase());
+    async update(filter: Filter<SlackConnectionBase> = {_id: this._id}): Promise<void> {
+        await SlackConnection.update(filter, {$set: this.getBase()});
     }
 
     // creater
