@@ -96,7 +96,7 @@ class SlackConnection extends Connection implements SlackConnectionBase {
     }
 
     async remove(): Promise<void> {
-        return deleteMany<SlackConnectionBase>("connections", this.getBase());
+        await SlackConnection.remove(this._id);
     }
 
     async update(filter: Filter<SlackConnectionBase> = {_id: this._id}): Promise<void> {

@@ -30,6 +30,12 @@ const autoDeleteMessage = async function f(
     for (let limit = sec; limit > 0; limit--) {
         const content = `${message}\nこのメッセージは${limit}秒後に削除されます。`;
         await sentMessage.edit({...options, content});
+        await new Promise(resolve => {
+            setTimeout(resolve, 1000);
+        });
+    }
+    if (sentMessage.deletable) {
+        await sentMessage.delete();
     }
 };
 
