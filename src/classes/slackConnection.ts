@@ -13,7 +13,7 @@ type SlackConnectionBase = ConnectionBase & {
     };
 };
 
-class SlackConnection extends Connection<SlackConnectionBase> implements SlackConnectionBase {
+class SlackConnection extends Connection implements SlackConnectionBase {
     platform = "slack" as const;
     data: {
         send: string;
@@ -30,6 +30,7 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         }
     }
 
+    // static methods
     static async find(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
         const connectionBases = await find<SlackConnectionBase>("connections", filter);
         const connections = new Array<SlackConnection>();
@@ -40,8 +41,7 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
     }
 
     static async findActive(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return SlackConnection.find(activeFilter);
     }
 
@@ -54,8 +54,7 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
     }
 
     static async findActiveOne(filter: Filter<SlackConnectionBase>): Promise<SlackConnection | null> {
-        const activeFilter = filter;
-        activeFilter.active = true;
+        const activeFilter = {...filter, active: true};
         return SlackConnection.findOne(activeFilter);
     }
 
@@ -71,23 +70,18 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         await deleteMany<SlackConnectionBase>("connections", {clusterId});
     }
 
-    getBase(): SlackConnectionBase {
-        return {
-            _id: this._id,
-            clusterId: this.clusterId,
-            name: this.name,
-            platform: this.platform,
-            active: this.active,
-            data: this.data,
-        };
+    static fromConnection(connection: Connection): SlackConnectionBase {
+        const connectionBase = connection.getBase();
+        return new SlackConnection({...connectionBase, platform: "slack"});
     }
 
+    // dynamic methods
     async isIncludes(): Promise<boolean> {
-        return isIncludes<SlackConnectionBase>("connections", this.getBase());
+        return SlackConnection.isIncludes(this.getBase());
     }
 
     async register(): Promise<boolean> {
-        if (await this.isIncludes()) {
+        if (!(await SlackConnection.isIncludes({_id: this._id}))) {
             await insertOne<SlackConnectionBase>("connections", this.getBase());
             return true;
         }
@@ -98,11 +92,31 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         return deleteMany<SlackConnectionBase>("connections", this.getBase());
     }
 
-    setConnectionBase(connectionBase: ConnectionBase): void {
+    // creater
+    fromConnection(connection: Connection) {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    fromConnectionBase(connectionBase: ConnectionBase) {
         this._id = connectionBase._id;
         this.clusterId = connectionBase.clusterId;
         this.name = connectionBase.name;
         this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
+    getBase(): SlackConnectionBase {
+        return {
+            _id: this._id,
+            clusterId: this.clusterId,
+            name: this.name,
+            platform: this.platform,
+            active: this.active,
+            data: this.data,
+        };
     }
 
     getConnectionBase(): ConnectionBase {
@@ -115,20 +129,14 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         };
     }
 
-    setSend(value: string): void {
+    setSend(value: string) {
         this.data.send = value;
+        return this;
     }
 
-    getSend(): string {
-        return this.data.send;
-    }
-
-    setRecv(value: string): void {
+    setRecv(value: string) {
         this.data.recv = value;
-    }
-
-    getRecv(): string {
-        return this.data.recv;
+        return this;
     }
 }
 
