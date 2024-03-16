@@ -1,11 +1,12 @@
 import type {Snowflake} from "discord-api-types/globals.js";
-import {ObjectId} from "mongodb";
+import type {Client} from "discord.js";
 import type {Filter} from "mongodb";
+import {ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
-import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
+import {Connection} from "./connection.js";
 
 type DiscordConnectionBase = ConnectionBase & {
     platform: "discord";
@@ -15,7 +16,7 @@ type DiscordConnectionBase = ConnectionBase & {
     };
 };
 
-class DiscordConnection extends Connection<DiscordConnectionBase> implements DiscordConnectionBase {
+class DiscordConnection extends Connection implements DiscordConnectionBase {
     platform = "discord" as const;
     data: {
         channelId: Snowflake;
@@ -32,6 +33,7 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         }
     }
 
+    // static methods
     static async find(filter: Filter<DiscordConnectionBase>): Promise<Array<DiscordConnection>> {
         const connectionBases = await find<DiscordConnectionBase>("connections", filter);
         const connections = new Array<DiscordConnection>();
@@ -41,12 +43,22 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         return connections;
     }
 
+    static async findActive(filter: Filter<DiscordConnectionBase>): Promise<Array<DiscordConnection>> {
+        const activeFilter = {...filter, active: true};
+        return DiscordConnection.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<DiscordConnectionBase>): Promise<DiscordConnection | null> {
         const connectionBase = await findOne<DiscordConnectionBase>("connections", filter);
         if (connectionBase === null) {
             return null;
         }
         return new DiscordConnection(connectionBase);
+    }
+
+    static async findActiveOne(filter: Filter<DiscordConnectionBase>): Promise<DiscordConnection | null> {
+        const activeFilter = {...filter, active: true};
+        return DiscordConnection.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<DiscordConnectionBase>): Promise<boolean> {
@@ -61,6 +73,52 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         await deleteMany<DiscordConnectionBase>("connections", {clusterId});
     }
 
+    // static Discord only methods
+    static async channelAccessible(client: Client, channelId: Snowflake): Promise<boolean> {
+        try {
+            return (await client.channels.fetch(channelId)) !== null;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // dynamic methods
+    async isIncludes(): Promise<boolean> {
+        return DiscordConnection.isIncludes(this.getBase());
+    }
+
+    async register(): Promise<boolean> {
+        if (!(await DiscordConnection.isIncludes({_id: this._id}))) {
+            await insertOne<DiscordConnectionBase>("connections", this.getBase());
+            return true;
+        }
+        return false;
+    }
+
+    async remove(): Promise<void> {
+        return deleteMany<DiscordConnectionBase>("connections", this.getBase());
+    }
+
+    async channelAccessible(client: Client): Promise<boolean> {
+        return DiscordConnection.channelAccessible(client, this.data.channelId);
+    }
+
+    // creater
+    fromConnection(connection: Connection): DiscordConnection {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    fromConnectionBase(connectionBase: ConnectionBase) {
+        this._id = connectionBase._id;
+        this.clusterId = connectionBase.clusterId;
+        this.name = connectionBase.name;
+        this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
     getBase(): DiscordConnectionBase {
         return {
             _id: this._id,
@@ -70,32 +128,6 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
             active: this.active,
             data: this.data,
         };
-    }
-
-    async isIncludes(): Promise<boolean> {
-        return isIncludes<DiscordConnectionBase>("connections", this.getBase());
-    }
-
-    async register(): Promise<void> {
-        return updateOrInsert<DiscordConnectionBase>(
-            "connections",
-            {
-                platform: this.platform,
-                name: this.name,
-            },
-            this.getBase(),
-        );
-    }
-
-    async remove(): Promise<void> {
-        return deleteMany<DiscordConnectionBase>("connections", this.getBase());
-    }
-
-    setConnectionBase(connectionBase: ConnectionBase): void {
-        this._id = connectionBase._id;
-        this.clusterId = connectionBase.clusterId;
-        this.name = connectionBase.name;
-        this.active = connectionBase.active;
     }
 
     getConnectionBase(): ConnectionBase {
@@ -108,20 +140,14 @@ class DiscordConnection extends Connection<DiscordConnectionBase> implements Dis
         };
     }
 
-    setChannelId(channelId: Snowflake): void {
+    setChannelId(channelId: Snowflake) {
         this.data.channelId = channelId;
+        return this;
     }
 
-    getChannelId(): Snowflake {
-        return this.data.channelId;
-    }
-
-    setChannelWebhook(channelWebhook: Snowflake): void {
+    setChannelWebhook(channelWebhook: Snowflake) {
         this.data.channelWebhook = channelWebhook;
-    }
-
-    getChannelWebhook(): Snowflake {
-        return this.data.channelWebhook;
+        return this;
     }
 }
 

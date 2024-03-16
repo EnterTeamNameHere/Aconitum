@@ -1,6 +1,6 @@
 import type {Filter, ObjectId} from "mongodb";
 
-import {deleteMany, find, findOne, isIncludes, updateOrInsert} from "../utils/db.js";
+import {deleteMany, find, findOne, insertOne, isIncludes} from "../utils/db.js";
 
 import {Connection} from "./connection.js";
 import type {ConnectionBase} from "./connection.js";
@@ -13,7 +13,7 @@ type SlackConnectionBase = ConnectionBase & {
     };
 };
 
-class SlackConnection extends Connection<SlackConnectionBase> implements SlackConnectionBase {
+class SlackConnection extends Connection implements SlackConnectionBase {
     platform = "slack" as const;
     data: {
         send: string;
@@ -30,6 +30,7 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         }
     }
 
+    // static methods
     static async find(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
         const connectionBases = await find<SlackConnectionBase>("connections", filter);
         const connections = new Array<SlackConnection>();
@@ -39,12 +40,22 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         return connections;
     }
 
+    static async findActive(filter: Filter<SlackConnectionBase>): Promise<Array<SlackConnection>> {
+        const activeFilter = {...filter, active: true};
+        return SlackConnection.find(activeFilter);
+    }
+
     static async findOne(filter: Filter<SlackConnectionBase>): Promise<SlackConnection | null> {
         const connectionBase = await findOne<SlackConnectionBase>("connections", filter);
         if (connectionBase === null) {
             return null;
         }
         return new SlackConnection(connectionBase);
+    }
+
+    static async findActiveOne(filter: Filter<SlackConnectionBase>): Promise<SlackConnection | null> {
+        const activeFilter = {...filter, active: true};
+        return SlackConnection.findOne(activeFilter);
     }
 
     static async isIncludes(filter: Filter<SlackConnectionBase>): Promise<boolean> {
@@ -59,6 +70,44 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         await deleteMany<SlackConnectionBase>("connections", {clusterId});
     }
 
+    static fromConnection(connection: Connection): SlackConnectionBase {
+        const connectionBase = connection.getBase();
+        return new SlackConnection({...connectionBase, platform: "slack"});
+    }
+
+    // dynamic methods
+    async isIncludes(): Promise<boolean> {
+        return SlackConnection.isIncludes(this.getBase());
+    }
+
+    async register(): Promise<boolean> {
+        if (!(await SlackConnection.isIncludes({_id: this._id}))) {
+            await insertOne<SlackConnectionBase>("connections", this.getBase());
+            return true;
+        }
+        return false;
+    }
+
+    async remove(): Promise<void> {
+        return deleteMany<SlackConnectionBase>("connections", this.getBase());
+    }
+
+    // creater
+    fromConnection(connection: Connection) {
+        const connectionBase = connection.getBase();
+        Object.assign(this, connectionBase);
+        return this;
+    }
+
+    fromConnectionBase(connectionBase: ConnectionBase) {
+        this._id = connectionBase._id;
+        this.clusterId = connectionBase.clusterId;
+        this.name = connectionBase.name;
+        this.active = connectionBase.active;
+        return this;
+    }
+
+    // get / set
     getBase(): SlackConnectionBase {
         return {
             _id: this._id,
@@ -68,32 +117,6 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
             active: this.active,
             data: this.data,
         };
-    }
-
-    async isIncludes(): Promise<boolean> {
-        return isIncludes<SlackConnectionBase>("connections", this.getBase());
-    }
-
-    async register(): Promise<void> {
-        return updateOrInsert<SlackConnectionBase>(
-            "connections",
-            {
-                platform: this.platform,
-                name: this.name,
-            },
-            this.getBase(),
-        );
-    }
-
-    async remove(): Promise<void> {
-        return deleteMany<SlackConnectionBase>("connections", this.getBase());
-    }
-
-    setConnectionBase(connectionBase: ConnectionBase): void {
-        this._id = connectionBase._id;
-        this.clusterId = connectionBase.clusterId;
-        this.name = connectionBase.name;
-        this.active = connectionBase.active;
     }
 
     getConnectionBase(): ConnectionBase {
@@ -106,20 +129,14 @@ class SlackConnection extends Connection<SlackConnectionBase> implements SlackCo
         };
     }
 
-    setSend(value: string): void {
+    setSend(value: string) {
         this.data.send = value;
+        return this;
     }
 
-    getSend(): string {
-        return this.data.send;
-    }
-
-    setRecv(value: string): void {
+    setRecv(value: string) {
         this.data.recv = value;
-    }
-
-    getRecv(): string {
-        return this.data.recv;
+        return this;
     }
 }
 

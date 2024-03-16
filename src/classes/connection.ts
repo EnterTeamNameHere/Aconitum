@@ -4,14 +4,14 @@ import {ObjectId} from "mongodb";
 import {checkStringId} from "../utils/db.js";
 
 import {Cluster} from "./cluster.js";
-import {DiscordConnection} from "./discordConnection.js";
 import type {DiscordConnectionBase} from "./discordConnection.js";
-import {LineConnection} from "./lineConnection.js";
+import {DiscordConnection} from "./discordConnection.js";
 import type {LineConnectionBase} from "./lineConnection.js";
-import {SlackConnection} from "./slackConnection.js";
+import {LineConnection} from "./lineConnection.js";
 import type {SlackConnectionBase} from "./slackConnection.js";
-import {TeamsConnection} from "./teamsConnection.js";
+import {SlackConnection} from "./slackConnection.js";
 import type {TeamsConnectionBase} from "./teamsConnection.js";
+import {TeamsConnection} from "./teamsConnection.js";
 
 // export type OmitFunction<T> = Pick<
 //   T,
@@ -30,17 +30,17 @@ type ConnectionBase = {
     active: boolean;
 };
 
-type Connections = Connection<ConnectionBases> | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
+type Connections = Connection | DiscordConnection | TeamsConnection | LineConnection | SlackConnection;
 type ConnectionBases = ConnectionBase | DiscordConnectionBase | TeamsConnectionBase | LineConnectionBase | SlackConnectionBase;
 
-class Connection<T extends ConnectionBases> {
-    _id: ObjectId = new ObjectId("");
-    clusterId: ObjectId = new ObjectId("");
+class Connection {
+    _id: ObjectId = new ObjectId();
+    clusterId: ObjectId = new ObjectId();
     name: string = "";
     platform: Platform = "uncategorized";
     active: boolean = false;
 
-    constructor(connection?: Partial<T>) {
+    constructor(connection?: Partial<ConnectionBases>) {
         if (connection) {
             Object.assign(this, connection);
         }
@@ -88,6 +88,7 @@ class Connection<T extends ConnectionBases> {
         return result;
     }
 
+    // set and get
     getBase(): ConnectionBase {
         return {
             _id: this._id,
@@ -98,62 +99,46 @@ class Connection<T extends ConnectionBases> {
         };
     }
 
+    setStringId(value: string) {
+        this._id = new ObjectId(value);
+        return this;
+    }
+
     getStringId(): string {
         return this._id.toHexString();
     }
 
-    setStringId(value: string): ObjectId {
-        this._id = new ObjectId(value);
-        return this._id;
+    setStringClusterId(value: string) {
+        this.clusterId = new ObjectId(value);
+        return this;
     }
 
     getStringClusterId(): string {
         return this.clusterId.toHexString();
     }
 
-    setStringClusterId(value: string): ObjectId {
-        this.clusterId = new ObjectId(value);
-        return this.clusterId;
-    }
-
-    setId(value: ObjectId): void {
+    setId(value: ObjectId) {
         this._id = value;
+        return this;
     }
 
-    getId(): ObjectId {
-        return this._id;
-    }
-
-    setClusterId(value: ObjectId): void {
+    setClusterId(value: ObjectId) {
         this.clusterId = value;
+        return this;
     }
 
-    getClusterId(): ObjectId {
-        return this.clusterId;
-    }
-
-    setName(value: string): void {
+    setName(value: string) {
         this.name = value;
+        return this;
     }
 
-    getName(): string {
-        return this.name;
-    }
-
-    setPlatform(value: Platform): void {
+    setPlatform(value: Platform) {
         this.platform = value;
+        return this;
     }
-
-    getPlatform(): Platform {
-        return this.platform;
-    }
-
-    setActive(value: boolean): void {
+    setActive(value: boolean) {
         this.active = value;
-    }
-
-    getActive(): boolean {
-        return this.active;
+        return this;
     }
 }
 
