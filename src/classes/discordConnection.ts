@@ -1,4 +1,5 @@
 import type {Snowflake} from "discord-api-types/globals.js";
+import { DiscordAPIError, WebhookClient} from "discord.js";
 import type {Client} from "discord.js";
 import type {Filter, UpdateFilter} from "mongodb";
 import {ObjectId} from "mongodb";
@@ -85,6 +86,19 @@ class DiscordConnection extends Connection implements DiscordConnectionBase {
         for (const connection of connections) {
             if (!(await connection.channelAccessible(client))) {
                 await connection.remove();
+            }
+
+            const webhookClient = new WebhookClient({url: connection.data.channelWebhook});
+            try {
+                await webhookClient.send("");
+            } catch (e) {
+                if (e instanceof DiscordAPIError) {
+                    if (e.code === 10015) {
+                        await connection.remove();
+                    } else if (e.code !== 50006) {
+                        throw e;
+                    }
+                }
             }
         }
     }
